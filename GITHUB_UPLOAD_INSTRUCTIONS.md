@@ -13,14 +13,14 @@ cd "/Users/priyanshimodi/Documents/projects/TSC/veo final gemini"
 gh auth login
 
 # Create the repository and push
-gh repo create veo-ultimate-gemini --public --source=. --remote=origin --push
+gh repo create veo-prompt-generator --public --source=. --remote=origin --push
 ```
 
 ### Option 2: Using GitHub Website (Manual)
 
 1. **Create a new repository on GitHub:**
    - Go to https://github.com/new
-   - Repository name: `veo-ultimate-gemini`
+   - Repository name: `veo-prompt-generator`
    - Description: `AI-powered video prompt generator for Google Veo 3 with Gemini Vision and automatic visual style detection`
    - Make it **Public**
    - **DO NOT** initialize with README (we already have one)
@@ -31,7 +31,7 @@ gh repo create veo-ultimate-gemini --public --source=. --remote=origin --push
    ```bash
    cd "/Users/priyanshimodi/Documents/projects/TSC/veo final gemini"
 
-   git remote add origin https://github.com/priyanshi496/veo-ultimate-gemini.git
+   git remote add origin https://github.com/priyanshi496/veo-prompt-generator.git
    git branch -M main
    git push -u origin main
    ```
@@ -41,7 +41,7 @@ gh repo create veo-ultimate-gemini --public --source=. --remote=origin --push
 ```bash
 cd "/Users/priyanshimodi/Documents/projects/TSC/veo final gemini"
 
-git remote add origin git@github.com:priyanshi496/veo-ultimate-gemini.git
+git remote add origin git@github.com:priyanshi496/veo-prompt-generator.git
 git branch -M main
 git push -u origin main
 ```
@@ -67,7 +67,7 @@ git push -u origin main
 ## 🎯 After Pushing
 
 Once you push to GitHub, your repository will be available at:
-**https://github.com/priyanshi496/veo-ultimate-gemini**
+**https://github.com/priyanshi496/veo-prompt-generator**
 
 You can then:
 

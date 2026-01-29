@@ -59,8 +59,8 @@ A powerful AI-powered video prompt generator for Google's Veo 3, featuring intel
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/priyanshi496/veo-ultimate-gemini.git
-cd veo-ultimate-gemini
+git clone https://github.com/priyanshi496/veo-prompt-generator.git
+cd veo-prompt-generator
 ```
 
 2. **Install dependencies**
@@ -147,7 +147,7 @@ Upload real photo → AI detects "Cinematic Photorealism" → Professional, real
 ## 📁 Project Structure
 
 ```
-veo-ultimate-gemini/
+veo-prompt-generator/
 ├── server.py                    # Flask backend with Gemini integration
 ├── veo.html                     # Main frontend application
 ├── veo_apikey.js               # API key management
