@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veo Ultimate - Gemini Vision Edition</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #D4AF37;
+            --primary-dark: #B8960F;
+            --accent: #FF6B35;
+            --bg-dark: #0A0A0A;
+            --bg-card: #151515;
+            --bg-input: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --border: #2A2A2A;
+            --success: #4ADE80;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            
+            --font-display: 'Crimson Pro', serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: gradientShift 20s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl) var(--spacing-md);
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        .logo {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-sm);
+            letter-spacing: -0.02em;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        .free-badge {
+            display: inline-block;
+            background: var(--success);
+            color: var(--bg-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: var(--spacing-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: var(--spacing-lg);
+            animation: fadeInUp 0.8s ease;
+            animation-fill-mode: both;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: var(--font-body);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-sm);
+        }
+        
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: var(--spacing-xs);
+        }
+        
+        .collapsible-section {
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .collapsible-header {
+            background: var(--bg-input);
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        
+        .collapsible-header:hover {
+            background: #252525;
+        }
+        
+        .collapsible-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .collapsible-toggle {
+            transition: transform 0.3s ease;
+        }
+        
+        .collapsible-toggle.open {
+            transform: rotate(180deg);
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        
+        .collapsible-content.open {
+            max-height: 3000px;
+            padding: var(--spacing-md);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: #252525;
+            box-shadow: none;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+        
+        .output-container {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            min-height: 400px;
+            position: relative;
+        }
+        
+        .output-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .output-placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.3;
+        }
+        
+        .output-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: var(--text-primary);
+            display: none;
+        }
+        
+        .output-text.visible {
+            display: block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+        
+        .loading.visible {
+            display: block;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--spacing-sm);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: var(--text-secondary);
+        }
+        
+        .status-message {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-md);
+            display: none;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .status-message.visible {
+            display: flex;
+        }
+        
+        .status-message.success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+        
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .status-message.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .status-message.info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--info);
+            color: var(--info);
+        }
+        
+        .api-settings {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .api-toggle {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .api-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .api-content.open {
+            max-height: 800px;
+            margin-top: var(--spacing-md);
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .copy-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .info-box {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .scene-memory-box {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .memory-title {
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .memory-content {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .memory-item {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .memory-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .memory-value {
+            color: var(--text-primary);
+            margin-left: var(--spacing-xs);
+        }
+
+        .continuity-mode {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .continuity-label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+        }
+
+        /* Image Upload */
+        .image-upload-container {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-input);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary);
+            background: #1A1A1A;
+        }
+
+        .image-upload-container.has-image {
+            border-style: solid;
+            border-color: var(--success);
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 0 auto var(--spacing-sm);
+            display: none;
+        }
+
+        .image-preview.visible {
+            display: block;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-xs);
+            opacity: 0.5;
+        }
+
+        /* Consistency Rules Box */
+        .consistency-rules-box {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin-top: var(--spacing-sm);
+            font-size: 0.9rem;
+        }
+
+        .consistency-rules-box strong {
+            color: var(--accent);
+        }
+
+        .consistency-rules-box ul {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .consistency-rules-box li {
+            margin-bottom: 0.25rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="logo">Veo Ultimate</h1>
+            <p class="tagline">Gemini Vision + Voice Control + Perfect Consistency</p>
+            <span class="free-badge">🔮 Powered by Google Gemini</span>
+        </header>
+        
+        <!-- API Settings -->
+        <div class="api-settings">
+            <div class="api-toggle" onclick="toggleApiSettings()">
+                <span>🔑 API Settings (Free)</span>
+                <span id="apiToggleIcon">▼</span>
+            </div>
+            <div class="api-content" id="apiContent">
+                <!-- Hugging Face Token -->
+                <div class="info-box">
+                    <div class="info-title">🤗 Hugging Face (For Prompt Generation)</div>
+                    <ol style="margin-left: 1.5rem; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <li>Go to <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary);">huggingface.co/settings/tokens</a></li>
+                        <li>Sign up (free, no credit card)</li>
+                        <li>Click "New token" → Name: "Veo", Type: "Read"</li>
+                        <li>Copy token and paste below</li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hugging Face API Token</label>
+                    <input type="password" id="apiKey" class="form-input" 
+                           placeholder="hf_...">
+                    <p class="form-hint">Used for prompt generation with LLM</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model</label>
+                    <select id="modelSelect" class="form-select">
+                        <option value="meta-llama/Llama-3.3-70B-Instruct">Llama 3.3 70B (Best Quality)</option>
+                        <option value="Qwen/Qwen2.5-72B-Instruct">Qwen 2.5 72B (Great Alternative)</option>
+                        <option value="microsoft/Phi-3.5-mini-instruct">Phi 3.5 Mini (Faster)</option>
+                    </select>
+                </div>
+
+                <!-- Google Gemini Token -->
+                <div class="info-box" style="margin-top: var(--spacing-md);">
+                    <div class="info-title">🔮 Google Gemini (For Image Analysis)</div>
+                    <ol style="margin-left: 1.5rem; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary);">aistudio.google.com/app/apikey</a></li>
+                        <li>Sign in with Google (free)</li>
+                        <li>Click "Create API key" → Choose project or create new</li>
+                        <li>Copy key and paste below</li>
+                        <li><strong>FREE: 1500 requests/day</strong> (more than enough!)</li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Google Gemini API Key</label>
+                    <input type="password" id="geminiKey" class="form-input" 
+                           placeholder="AIza...">
+                    <p class="form-hint">Used for AI image analysis with Gemini 1.5 Flash</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene Continuity Toggle -->
+        <div class="continuity-mode">
+            <div class="continuity-label">
+                <span>🔒</span>
+                <span>Character Consistency Mode (Enforced)</span>
+            </div>
+            <div class="toggle-switch active" id="continuityToggle" onclick="toggleContinuity()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+
+        <!-- Scene Memory Display -->
+        <div class="scene-memory-box" id="sceneMemoryBox" style="display: none;">
+            <div class="memory-title">
+                <span>💾</span>
+                <span>Stored Character Data:</span>
+            </div>
+            <div class="memory-content" id="memoryContent"></div>
+            <button class="btn-secondary btn-small" style="margin-top: var(--spacing-sm);" onclick="clearMemory()">
+                🗑️ Clear All Character Data
+            </button>
+        </div>
+        
+        <div class="main-grid">
+            <!-- Input Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">✨</div>
+                    <h2 class="card-title">Scene Details</h2>
+                </div>
+                
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message"></div>
+                
+                <!-- Basic Info -->
+                <div class="form-group">
+                    <label class="form-label">Scene Description</label>
+                    <textarea id="sceneDescription" class="form-textarea" 
+                              placeholder="Example: Ashoka reflects on the aftermath of Kalinga war"
+                              rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Duration</label>
+                        <select id="duration" class="form-select">
+                            <option value="8">8 seconds</option>
+                            <option value="15">15 seconds</option>
+                            <option value="20">20 seconds</option>
+                            <option value="30">30 seconds</option>
+                            <option value="45">45 seconds</option>
+                            <option value="60">60 seconds</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Scene Number</label>
+                        <input type="text" id="sceneNumber" class="form-input" 
+                               placeholder="1 of 3" value="1 of 3">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Scene Type</label>
+                    <select id="sceneType" class="form-select">
+                        <option value="dialogue">Continuous Dialogue (Seamless)</option>
+                        <option value="scene_change">Scene Change (Fade to Black)</option>
+                        <option value="action">Action Sequence (Seamless)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🎨 Visual Style / Character Type</label>
+                    <select id="visualStyle" class="form-select">
+                        <option value="Cinematic Photorealism">📸 Photorealistic / Cinematic (Default)</option>
+                        <option value="3D Animation (Pixar/Disney Style)">🧸 3D Animation (Pixar/Disney Style)</option>
+                        <option value="2D Anime Style">🎌 2D Anime / Manga Style</option>
+                        <option value="Digital AI Avatar">🤖 Digital Avatar / AI Character</option>
+                        <option value="Cyberpunk/Futuristic">🌃 Cyberpunk / Futuristic</option>
+                        <option value="Oil Painting Art Style">🎨 Oil Painting / Artistic</option>
+                        <option value="Vintage Film (1950s)">🎞️ Vintage Film Look</option>
+                    </select>
+                    <p class="form-hint">This style will be applied to the entire story for consistency</p>
+                </div>
+                
+                <!-- PRIMARY CHARACTER WITH IMAGE UPLOAD -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">👤 Primary Character (Gemini AI Analysis)</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content open">
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label class="form-label">📸 Upload Character Image</label>
+                            <div class="image-upload-container" id="primaryImageContainer" onclick="document.getElementById('primaryImageInput').click()">
+                                <img id="primaryImagePreview" class="image-preview" alt="Character preview">
+                                <div id="primaryUploadText">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Click to upload character image</div>
+                                    <div class="upload-text" style="font-size: 0.8rem; margin-top: 0.25rem;">Gemini AI will analyze and describe</div>
+                                </div>
+                            </div>
+                            <input type="file" id="primaryImageInput" accept="image/*" onchange="handleImageUpload('primary')">
+                            <button class="btn btn-small" id="primaryAnalyzeBtn" onclick="analyzeImage('primary')" style="display: none; margin-top: 0.5rem;">
+                                🔮 Analyze with Gemini
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Character Name</label>
+                            <input type="text" id="primaryChar" class="form-input" 
+                                   placeholder="e.g., Emperor Ashoka">
+                        </div>
+
+                        <!-- Voice Type -->
+                        <div class="form-group">
+                            <label class="form-label">🎤 Voice Type</label>
+                            <select id="primaryVoice" class="form-select">
+                                <option value="deep_male">Deep Male Voice</option>
+                                <option value="medium_male">Medium Male Voice</option>
+                                <option value="soft_male">Soft/Young Male Voice</option>
+                                <option value="deep_female">Deep Female Voice</option>
+                                <option value="medium_female">Medium Female Voice</option>
+                                <option value="soft_female">Soft/Young Female Voice</option>
+                                <option value="child">Child Voice</option>
+                                <option value="elderly">Elderly Voice</option>
+                                <option value="divine">Divine/Ethereal Voice</option>
+                            </select>
+                            <p class="form-hint">Voice type will be remembered for this character</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Character Description</label>
+                            <textarea id="charDescription" class="form-textarea" 
+                                      placeholder="Will be auto-filled by Gemini AI analysis, or type manually"
+                                      rows="3"></textarea>
+                            <p class="form-hint">Gemini will fill this automatically from uploaded image</p>
+                        </div>
+
+                        <!-- Consistency Rules -->
+                        <div class="form-group">
+                            <label class="form-label">🔒 Consistency Rules (Fixed Attributes)</label>
+                            <textarea id="primaryConsistencyRules" class="form-textarea" 
+                                      placeholder="Example:
+- Always wear royal Mauryan attire with golden patterns
+- Maintain scar above left eyebrow from battle
+- Keep contemplative, thoughtful expressions
+- Golden crown remains consistently visible
+- Eyes always dark brown with depth and wisdom
+- Royal bearing and confident posture"
+                                      rows="6"></textarea>
+                            <div class="consistency-rules-box">
+                                <strong>💡 Consistency Rules:</strong> These attributes will NEVER change across all scenes. They're enforced in every prompt to ensure perfect character continuity.
+                            </div>
+                        </div>
+                        
+                        <!-- Primary Character Dialogue -->
+                        <div class="form-group">
+                            <label class="form-label">💬 Dialogue (Optional)</label>
+                            <textarea id="primaryDialogue" class="form-textarea" 
+                                      placeholder="Hindi dialogue for this character"
+                                      rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Emotion/Delivery</label>
+                            <select id="primaryEmotion" class="form-select">
+                                <option value="neutral">Neutral/Calm</option>
+                                <option value="contemplative">Contemplative/Reflective</option>
+                                <option value="wise">Wise/Teaching</option>
+                                <option value="sorrowful">Sorrowful/Regretful</option>
+                                <option value="determined">Determined/Resolute</option>
+                                <option value="compassionate">Compassionate/Gentle</option>
+                                <option value="angry">Angry/Furious</option>
+                                <option value="joyful">Joyful/Happy</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECONDARY CHARACTER WITH IMAGE UPLOAD -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">👥 Secondary Character (Optional)</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label class="form-label">📸 Upload Character Image</label>
+                            <div class="image-upload-container" id="secondaryImageContainer" onclick="document.getElementById('secondaryImageInput').click()">
+                                <img id="secondaryImagePreview" class="image-preview" alt="Character preview">
+                                <div id="secondaryUploadText">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Click to upload character image</div>
+                                    <div class="upload-text" style="font-size: 0.8rem; margin-top: 0.25rem;">Gemini AI will analyze</div>
+                                </div>
+                            </div>
+                            <input type="file" id="secondaryImageInput" accept="image/*" onchange="handleImageUpload('secondary')">
+                            <button class="btn btn-small" id="secondaryAnalyzeBtn" onclick="analyzeImage('secondary')" style="display: none; margin-top: 0.5rem;">
+                                🔮 Analyze with Gemini
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Character Name</label>
+                            <input type="text" id="secondaryChar" class="form-input" 
+                                   placeholder="e.g., Buddhist Monk">
+                        </div>
+
+                        <!-- Voice Type -->
+                        <div class="form-group">
+                            <label class="form-label">🎤 Voice Type</label>
+                            <select id="secondaryVoice" class="form-select">
+                                <option value="deep_male">Deep Male Voice</option>
+                                <option value="medium_male">Medium Male Voice</option>
+                                <option value="soft_male">Soft/Young Male Voice</option>
+                                <option value="deep_female">Deep Female Voice</option>
+                                <option value="medium_female">Medium Female Voice</option>
+                                <option value="soft_female">Soft/Young Female Voice</option>
+                                <option value="elderly">Elderly Voice</option>
+                                <option value="divine">Divine/Ethereal Voice</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Character Description</label>
+                            <textarea id="secondaryCharDescription" class="form-textarea" 
+                                      placeholder="Will be auto-filled by Gemini or type manually"
+                                      rows="2"></textarea>
+                        </div>
+
+                        <!-- Consistency Rules -->
+                        <div class="form-group">
+                            <label class="form-label">🔒 Consistency Rules (Optional)</label>
+                            <textarea id="secondaryConsistencyRules" class="form-textarea" 
+                                      placeholder="Fixed attributes for this character"
+                                      rows="4"></textarea>
+                        </div>
+                        
+                        <!-- Secondary Character Dialogue -->
+                        <div class="form-group">
+                            <label class="form-label">💬 Dialogue (Optional)</label>
+                            <textarea id="secondaryDialogue" class="form-textarea" 
+                                      placeholder="Hindi dialogue"
+                                      rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Emotion/Delivery</label>
+                            <select id="secondaryEmotion" class="form-select">
+                                <option value="neutral">Neutral/Calm</option>
+                                <option value="wise">Wise/Peaceful</option>
+                                <option value="humble">Humble/Respectful</option>
+                                <option value="concerned">Concerned</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Environment -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">🌍 Environment</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-group">
+                            <label class="form-label">Setting</label>
+                            <input type="text" id="setting" class="form-input" 
+                                   placeholder="e.g., Battlefield aftermath at dusk">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Time of Day</label>
+                                <select id="timeOfDay" class="form-select">
+                                    <option value="day">Day</option>
+                                    <option value="dawn">Dawn</option>
+                                    <option value="dusk">Dusk</option>
+                                    <option value="night">Night</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lighting</label>
+                                <select id="lighting" class="form-select">
+                                    <option value="golden_hour">Golden Hour</option>
+                                    <option value="dramatic">Dramatic</option>
+                                    <option value="soft_diffused">Soft Diffused</option>
+                                    <option value="harsh">Harsh</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="generatePrompt()">
+                        ✨ Generate Prompt
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearForm()">
+                        🔄 Next Scene
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Output Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <h2 class="card-title">Generated Prompt</h2>
+                </div>
+                
+                <div class="output-container">
+                    <button class="copy-btn" id="copyBtn" onclick="copyPrompt()" style="display: none;">
+                        📋 Copy
+                    </button>
+                    
+                    <div class="output-placeholder" id="outputPlaceholder">
+                        <div class="output-placeholder-icon">🎬</div>
+                        <p>Your prompt will appear here</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Upload character images and generate!</p>
+                    </div>
+                    
+                    <div class="loading" id="loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">AI is working...</p>
+                    </div>
+                    
+                    <pre class="output-text" id="outputText"></pre>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="downloadPrompt()" id="downloadBtn" style="display: none;">
+                        💾 Download
+                    </button>
+                    <button class="btn btn-secondary" onclick="openVeo()" id="veoBtn" style="display: none;">
+                        🚀 Open Veo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Scene memory with consistency rules
+        let sceneMemory = {
+            enabled: true,
+            characters: {},
+            setting: '',
+            lighting: '',
+            timeOfDay: ''
+        };
+
+        let uploadedImages = {
+            primary: null,
+            secondary: null
+        };
+
+        // Load/save memory
+        function loadMemory() {
+            const saved = localStorage.getItem('scene_memory_ultimate');
+            if (saved) {
+                try {
+                    sceneMemory = JSON.parse(saved);
+                    updateMemoryDisplay();
+                } catch (e) {
+                    console.error('Error loading memory:', e);
+                }
+            }
+        }
+
+        function saveMemory() {
+            localStorage.setItem('scene_memory_ultimate', JSON.stringify(sceneMemory));
+            updateMemoryDisplay();
+        }
+
+        function clearMemory() {
+            if (confirm('Clear all character data? This will reset everything.')) {
+                sceneMemory = {
+                    enabled: true,
+                    characters: {},
+                    setting: '',
+                    lighting: '',
+                    timeOfDay: ''
+                };
+                uploadedImages = { primary: null, secondary: null };
+                saveMemory();
+                showStatus('All character data cleared!', 'success');
+            }
+        }
+
+        function updateMemoryDisplay() {
+            const box = document.getElementById('sceneMemoryBox');
+            const content = document.getElementById('memoryContent');
+            
+            if (Object.keys(sceneMemory.characters).length > 0) {
+                box.style.display = 'block';
+                
+                let html = '';
+                Object.keys(sceneMemory.characters).forEach(charName => {
+                    const char = sceneMemory.characters[charName];
+                    html += `<div class="memory-item">
+                        <strong style="color: var(--primary);">${charName}</strong><br>
+                        <span class="memory-label">Voice:</span> ${char.voice}<br>
+                        <span class="memory-label">Consistency Rules:</span> ${char.consistencyRules ? char.consistencyRules.split('\n').length + ' rules' : 'None'}<br>
+                        <span class="memory-label">Description:</span> ${char.description ? char.description.substring(0, 80) + '...' : 'None'}
+                    </div>`;
+                });
+                
+                content.innerHTML = html;
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        function toggleContinuity() {
+            const toggle = document.getElementById('continuityToggle');
+            sceneMemory.enabled = !sceneMemory.enabled;
+            
+            if (sceneMemory.enabled) {
+                toggle.classList.add('active');
+                showStatus('Consistency Mode ENABLED!', 'success');
+            } else {
+                toggle.classList.remove('active');
+                showStatus('Consistency Mode DISABLED.', 'warning');
+            }
+            
+            saveMemory();
+        }
+
+        // Store current scene
+        function storeCurrentScene(formData) {
+            if (!sceneMemory.enabled) return;
+            
+            // Store primary character
+            if (formData.primaryChar) {
+                sceneMemory.characters[formData.primaryChar] = {
+                    description: formData.charDescription || '',
+                    voice: formData.primaryVoice || 'medium_male',
+                    consistencyRules: formData.primaryConsistencyRules || '',
+                    imageBase64: uploadedImages.primary || ''
+                };
+            }
+            
+            // Store secondary character
+            if (formData.secondaryChar && formData.secondaryCharDescription) {
+                sceneMemory.characters[formData.secondaryChar] = {
+                    description: formData.secondaryCharDescription || '',
+                    voice: formData.secondaryVoice || 'medium_male',
+                    consistencyRules: formData.secondaryConsistencyRules || '',
+                    imageBase64: uploadedImages.secondary || ''
+                };
+            }
+            
+            if (formData.setting) sceneMemory.setting = formData.setting;
+            if (formData.lighting) sceneMemory.lighting = formData.lighting;
+            if (formData.timeOfDay) sceneMemory.timeOfDay = formData.timeOfDay;
+            
+            saveMemory();
+        }
+
+        // UI functions
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.collapsible-toggle');
+            
+            content.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+        
+        function toggleApiSettings() {
+            const content = document.getElementById('apiContent');
+            const icon = document.getElementById('apiToggleIcon');
+            
+            content.classList.toggle('open');
+            icon.textContent = content.classList.contains('open') ? '▲' : '▼';
+        }
+
+        // Image upload handling
+        function handleImageUpload(type) {
+            const input = document.getElementById(`${type}ImageInput`);
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Store image
+                    uploadedImages[type] = e.target.result;
+                    
+                    // Show preview
+                    const preview = document.getElementById(`${type}ImagePreview`);
+                    preview.src = e.target.result;
+                    preview.classList.add('visible');
+                    
+                    // Update container
+                    const container = document.getElementById(`${type}ImageContainer`);
+                    container.classList.add('has-image');
+                    
+                    // Hide upload text
+                    document.getElementById(`${type}UploadText`).style.display = 'none';
+                    
+                    // Show analyze button
+                    document.getElementById(`${type}AnalyzeBtn`).style.display = 'inline-flex';
+                    
+                    showStatus('Image uploaded! Click "Analyze with Gemini" to generate description.', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // AI Image Analysis with Gemini
+        async function analyzeImage(type) {
+            const geminiKey = document.getElementById('geminiKey').value.trim();
+            
+            if (!geminiKey) {
+                showStatus('Please enter your Google Gemini API key first! Get it free at: aistudio.google.com/app/apikey', 'error');
+                toggleApiSettings();
+                return;
+            }
+            
+            if (!uploadedImages[type]) {
+                showStatus('Please upload an image first!', 'error');
+                return;
+            }
+            
+            const analyzeBtn = document.getElementById(`${type}AnalyzeBtn`);
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '🔄 Analyzing with Gemini...';
+            
+            try {
+                const response = await fetch('http://localhost:5001/analyze_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gemini_key: geminiKey,
+                        image: uploadedImages[type]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    let errorMsg = data.error || 'Analysis failed';
+                    
+                    // Handle specific Gemini errors
+                    if (errorMsg.includes('API_KEY_INVALID')) {
+                        errorMsg = 'Invalid Gemini API key. Please check your key at aistudio.google.com/app/apikey';
+                    } else if (errorMsg.includes('PERMISSION_DENIED')) {
+                        errorMsg = 'Gemini API not enabled. Visit console.cloud.google.com to enable it.';
+                    } else if (errorMsg.includes('QUOTA_EXCEEDED')) {
+                        errorMsg = 'Daily quota exceeded (1500 free requests). Try again tomorrow.';
+                    }
+                    
+                    throw new Error(errorMsg);
+                }
+                
+                const description = data.description || 'No description generated';
+                const visualStyle = data.visual_style || 'Cinematic Photorealism';
+                
+                // Fill description field
+                const descField = type === 'primary' ? 'charDescription' : 'secondaryCharDescription';
+                document.getElementById(descField).value = description;
+                
+                // Auto-set visual style dropdown based on detected style
+                if (visualStyle) {
+                    const visualStyleSelect = document.getElementById('visualStyle');
+                    
+                    // Map detected style to dropdown options
+                    const styleMapping = {
+                        'Cinematic Photorealism': 'Cinematic Photorealism',
+                        '3D Animation (Pixar/Disney Style)': '3D Animation (Pixar/Disney Style)',
+                        '2D Anime Style': '2D Anime Style',
+                        'Digital AI Avatar': 'Digital AI Avatar',
+                        'Cyberpunk/Futuristic': 'Cyberpunk/Futuristic',
+                        'Oil Painting Art Style': 'Oil Painting Art Style',
+                        'Vintage Film (1950s)': 'Vintage Film (1950s)'
+                    };
+                    
+                    // Find matching option or use closest match
+                    let matchedStyle = styleMapping[visualStyle] || 'Cinematic Photorealism';
+                    
+                    // Try partial matching if exact match not found
+                    if (!styleMapping[visualStyle]) {
+                        for (const [key, value] of Object.entries(styleMapping)) {
+                            if (visualStyle.toLowerCase().includes(key.toLowerCase()) || 
+                                key.toLowerCase().includes(visualStyle.toLowerCase())) {
+                                matchedStyle = value;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    visualStyleSelect.value = matchedStyle;
+                    
+                    showStatus(`✨ Gemini analysis complete! Detected style: ${visualStyle}`, 'success');
+                } else {
+                    showStatus(`✨ Gemini analysis complete! Description added.`, 'success');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '🔮 Analyze with Gemini';
+            }
+        }
+
+        // Main generate function
+        async function generatePrompt() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                showStatus('Please enter your Hugging Face API token!', 'error');
+                toggleApiSettings();
+                return;
+            }
+            
+            // Get form data
+            const formData = {
+                sceneDescription: document.getElementById('sceneDescription').value,
+                duration: document.getElementById('duration').value,
+                sceneNumber: document.getElementById('sceneNumber').value,
+                sceneType: document.getElementById('sceneType').value,
+                visualStyle: document.getElementById('visualStyle').value,
+                primaryChar: document.getElementById('primaryChar').value,
+                charDescription: document.getElementById('charDescription').value,
+                primaryVoice: document.getElementById('primaryVoice').value,
+                primaryConsistencyRules: document.getElementById('primaryConsistencyRules').value,
+                primaryDialogue: document.getElementById('primaryDialogue').value,
+                primaryEmotion: document.getElementById('primaryEmotion').value,
+                secondaryChar: document.getElementById('secondaryChar').value,
+                secondaryCharDescription: document.getElementById('secondaryCharDescription').value,
+                secondaryVoice: document.getElementById('secondaryVoice').value,
+                secondaryConsistencyRules: document.getElementById('secondaryConsistencyRules').value,
+                secondaryDialogue: document.getElementById('secondaryDialogue').value,
+                secondaryEmotion: document.getElementById('secondaryEmotion').value,
+                setting: document.getElementById('setting').value,
+                timeOfDay: document.getElementById('timeOfDay').value,
+                lighting: document.getElementById('lighting').value
+            };
+            
+            if (!formData.sceneDescription) {
+                showStatus('Please fill in Scene Description!', 'error');
+                return;
+            }
+            
+            // Build consistency instructions
+            let consistencyInstructions = '';
+            if (sceneMemory.enabled && Object.keys(sceneMemory.characters).length > 0) {
+                consistencyInstructions = `\n\nCRITICAL CONSISTENCY ENFORCEMENT:\n`;
+                
+                Object.keys(sceneMemory.characters).forEach(charName => {
+                    const char = sceneMemory.characters[charName];
+                    consistencyInstructions += `\n${charName}:\n`;
+                    consistencyInstructions += `Description: ${char.description}\n`;
+                    consistencyInstructions += `Voice: ${char.voice}\n`;
+                    if (char.consistencyRules) {
+                        consistencyInstructions += `FIXED ATTRIBUTES (NEVER CHANGE):\n${char.consistencyRules}\n`;
+                    }
+                });
+                
+                consistencyInstructions += `\n⚠️ THESE ATTRIBUTES MUST REMAIN IDENTICAL IN ALL SCENES!\n`;
+            }
+            
+            // Transition logic
+            const transitionMap = {
+                'dialogue': 'SEAMLESS CONTINUE - No transition, scene flows naturally from previous',
+                'scene_change': 'FADE TO BLACK - Scene ends with 2sec fade to black, next begins with fade in',
+                'action': 'SEAMLESS CONTINUE - Continuous action sequence'
+            };
+            const transitionInst = transitionMap[formData.sceneType];
+            
+            // Show loading
+            document.getElementById('outputPlaceholder').style.display = 'none';
+            document.getElementById('outputText').classList.remove('visible');
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('copyBtn').style.display = 'none';
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('veoBtn').style.display = 'none';
+            
+            try {
+                const model = document.getElementById('modelSelect').value;
+                
+                const systemPrompt = `You are an expert Veo 3 prompt generator. Create detailed prompts with STRICT character consistency and visual style adherence.
+
+Structure:
+[SCENE METADATA]
+Duration: {duration}s | Scene: {number}
+
+[VISUAL STYLE]
+{Enforce the selected visual style throughout the entire scene}
+
+[CHARACTER SETUP]
+{Include full character details with voice type and consistency rules}
+
+[ENVIRONMENT]
+{Setting, lighting, time}
+
+[SHOT SPECIFICATION]
+{Camera details}
+
+[VISUAL FOCUS]
+{Action timeline}
+
+[DIALOGUE & AUDIO]
+{Character dialogues with voice type}
+
+[CHARACTER EMOTION]
+{Emotions and body language}
+
+[TECHNICAL]
+1080p | 16:9 | 24fps
+
+${consistencyInstructions}
+
+CRITICAL: 
+1. Follow consistency rules EXACTLY. Never deviate from fixed attributes.
+2. ENFORCE the visual style in EVERY aspect of the scene - characters, environment, lighting, and overall aesthetic.
+3. The visual style must be consistent across all scenes in the story.`;
+
+                const userPrompt = `Scene: ${formData.sceneDescription}
+Duration: ${formData.duration}s
+Type: ${formData.sceneType}
+
+VISUAL STYLE: ${formData.visualStyle}
+⚠️ CRITICAL: ALL elements (characters, environment, props, lighting) MUST match this visual style!
+
+PRIMARY CHARACTER:
+Name: ${formData.primaryChar || 'Not specified'}
+Description: ${formData.charDescription || 'Use stored'}
+Voice: ${formData.primaryVoice}
+Consistency Rules: ${formData.primaryConsistencyRules || 'None'}
+Dialogue: ${formData.primaryDialogue || 'None'}
+Emotion: ${formData.primaryEmotion}
+
+SECONDARY CHARACTER:
+Name: ${formData.secondaryChar || 'None'}
+Description: ${formData.secondaryCharDescription || 'None'}
+Voice: ${formData.secondaryVoice || 'N/A'}
+Consistency Rules: ${formData.secondaryConsistencyRules || 'None'}
+Dialogue: ${formData.secondaryDialogue || 'None'}
+
+ENVIRONMENT:
+Setting: ${formData.setting || sceneMemory.setting || 'Appropriate'}
+Lighting: ${formData.lighting}
+Time: ${formData.timeOfDay}
+
+TRANSITION: ${transitionInst}
+
+Generate complete Veo 3 prompt with PERFECT consistency and ${formData.visualStyle} visual style.`;
+
+                // Call backend
+                const response = await fetch('http://localhost:5001/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: apiKey,
+                        model: model,
+                        prompt: `<|system|>${systemPrompt}</s><|user|>${userPrompt}</s><|assistant|>`
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Generation failed');
+                }
+                
+                const data = await response.json();
+                let generatedPrompt = '';
+                
+                if (Array.isArray(data) && data[0]?.generated_text) {
+                    generatedPrompt = data[0].generated_text;
+                } else if (data.generated_text) {
+                    generatedPrompt = data.generated_text;
+                } else {
+                    throw new Error('Unexpected response');
+                }
+                
+                generatedPrompt = generatedPrompt.trim();
+                
+                // Store scene data
+                storeCurrentScene(formData);
+                
+                // Show output
+                document.getElementById('loading').classList.remove('visible');
+                document.getElementById('outputText').textContent = generatedPrompt;
+                document.getElementById('outputText').classList.add('visible');
+                document.getElementById('copyBtn').style.display = 'block';
+                document.getElementById('downloadBtn').style.display = 'inline-flex';
+                document.getElementById('veoBtn').style.display = 'inline-flex';
+                
+                showStatus('✨ Prompt generated with perfect consistency!', 'success');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').classList.remove('visible');
+                document.getElementById('outputPlaceholder').style.display = 'block';
+                
+                let errorMessage = error.message;
+                if (errorMessage.includes('Failed to fetch')) {
+                    errorMessage = 'Cannot connect to backend. Make sure Flask server is running on port 5001.';
+                }
+                
+                showStatus(`Error: ${errorMessage}`, 'error');
+            }
+        }
+        
+        // Utility functions
+        function copyPrompt() {
+            const text = document.getElementById('outputText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = '📋 Copy', 2000);
+            });
+        }
+        
+        function downloadPrompt() {
+            const text = document.getElementById('outputText').textContent;
+            const sceneNum = document.getElementById('sceneNumber').value.replace(/\s/g, '_');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `veo_prompt_scene_${sceneNum}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function openVeo() {
+            window.open('https://veo.google', '_blank');
+        }
+        
+        function clearForm() {
+            if (confirm('Clear for next scene? (Character data preserved)')) {
+                document.getElementById('sceneDescription').value = '';
+                document.getElementById('primaryDialogue').value = '';
+                document.getElementById('secondaryDialogue').value = '';
+                
+                // Auto-increment scene
+                const sceneNumInput = document.getElementById('sceneNumber');
+                const match = sceneNumInput.value.match(/(\d+)\s+of\s+(\d+)/);
+                if (match) {
+                    const current = parseInt(match[1]);
+                    const total = parseInt(match[2]);
+                    if (current < total) {
+                        sceneNumInput.value = `${current + 1} of ${total}`;
+                    }
+                }
+                
+                showStatus('Ready for next scene!', 'success');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message visible ${type}`;
+            
+            setTimeout(() => {
+                statusEl.classList.remove('visible');
+            }, 7000);
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load Hugging Face key
+            const savedApiKey = localStorage.getItem('hf_api_key');
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+            
+            // Load Gemini key
+            const savedGeminiKey = localStorage.getItem('gemini_api_key');
+            if (savedGeminiKey) {
+                document.getElementById('geminiKey').value = savedGeminiKey;
+            }
+            
+            // Save keys when changed
+            document.getElementById('apiKey').addEventListener('change', (e) => {
+                localStorage.setItem('hf_api_key', e.target.value);
+            });
+            
+            document.getElementById('geminiKey').addEventListener('change', (e) => {
+                localStorage.setItem('gemini_api_key', e.target.value);
+            });
+            
+            loadMemory();
+        });
+    </script>
+</body>
+</html>
