@@ -426,6 +426,110 @@ START YOUR ANALYSIS NOW:
         }), 500
 
 
+@app.route("/api/analyze_script", methods=["POST"])
+def analyze_script():
+    """Analyze raw script and break into 8-second scenes"""
+    try:
+        data = request.json
+        script = data.get("script")
+        token = data.get("token")
+        model = data.get("model")
+
+        if not script or not token:
+            return jsonify({"error": "Missing script or API token"}), 400
+
+        print(f"\n=== SCRIPT ANALYSIS REQUEST ===")
+        print(f"Script length: {len(script)} chars")
+
+        # Construct System Prompt for JSON output
+        system_prompt = """You are an expert script supervisor and storyboard artist. 
+Your task is to break down a raw narrative script into strictly timed 8-second scenes for video generation.
+
+INPUT: Raw story text/dialogue.
+OUTPUT: A JSON Object containing a list of scenes and the story title.
+
+RULES:
+1. EXTRACT a creative "story_title" from the context.
+2. Break the story into logical chunks (scenes) that last roughly 8 seconds max.
+3. If a dialogue/action is long, split it into multiple scenes.
+4. For EACH character in a scene, strictly provide:
+   - "voice_type": Choose from [deep_male, medium_male, soft_male, deep_female, medium_female, soft_female, child, elderly, divine].
+   - "description": Brief physical visual description.
+   - "emotion": Specific emotion for the shot.
+   - "dialogue": The exact lines spoken (or null).
+5. Extract Setting, Lighting, and Time of Day.
+6. RETURN ONLY RAW JSON.
+
+JSON STRUCTURE:
+{
+  "story_title": "The Title of the Story",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "description": "Visual description of action...",
+      "characters": [
+        { 
+          "name": "Name", 
+          "description": "Visual appearance...",
+          "voice_type": "medium_male", 
+          "dialogue": "Spoken text...", 
+          "emotion": "Emotion..." 
+        }
+      ],
+      "setting": "Environment details",
+      "lighting": "Lighting type",
+      "time_of_day": "Day/Night/Dusk/Dawn"
+    }
+  ]
+}
+"""
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": script}
+            ],
+            "max_tokens": 4000,
+            "temperature": 0.7,
+            "response_format": {"type": "json_object"} # Force JSON if supported, otherwise prompt implies it
+        }
+
+        print("Calling Hugging Face for Script Analysis...")
+        response = requests.post(
+            "https://router.huggingface.co/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=120
+        )
+
+        if response.status_code != 200:
+             return jsonify({"error": f"LLM API Error: {response.text}"}), response.status_code
+
+        result = response.json()
+        content = result['choices'][0]['message']['content']
+        
+        # Clean markdown if present
+        content = content.replace("```json", "").replace("```", "").strip()
+        
+        try:
+            parsed_json = json.loads(content)
+            print(f"Successfully parsed {len(parsed_json.get('scenes', []))} scenes.")
+            return jsonify(parsed_json)
+        except json.JSONDecodeError:
+            print("Failed to parse JSON")
+            return jsonify({"error": "LLM failed to return valid JSON", "raw_content": content}), 500
+
+    except Exception as e:
+        print(f"Error in analyze_script: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     print("\n" + "="*60)
     print("🚀 VEO ULTIMATE GENERATOR - MONGODB EDITION")

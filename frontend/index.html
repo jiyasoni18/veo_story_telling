@@ -103,6 +103,41 @@
         </div>
 
         <div class="main-grid">
+            <!-- Script Input Section -->
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+                <div class="card-header">
+                    <div class="card-icon">📜</div>
+                    <h2 class="card-title">Smart Script Analysis</h2>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Raw Script / Story</label>
+                    <textarea id="rawScript" class="form-textarea"
+                        placeholder="Paste your full story here (dialogue, action, narrative). AI will break it into 8-second scenes."
+                        rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" id="analyzeScriptBtn" onclick="analyzeRawScript()">
+                        🚀 Break into Scenes
+                    </button>
+                </div>
+
+                <!-- Scene Navigation (Hidden initially) -->
+                <div id="sceneNavigation"
+                    style="display:none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn-secondary btn-small" onclick="navigateScene(-1)">◀ Prev</button>
+                        <span id="sceneCounter" style="color: var(--primary); font-weight: bold;">Scene 1 of X</span>
+                        <button class="btn-secondary btn-small" onclick="navigateScene(1)">Next ▶</button>
+                    </div>
+                    <p
+                        style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                        Reviewing scene fills the form below automatically.
+                    </p>
+                </div>
+            </div>
+
             <!-- Input Section -->
             <div class="card">
                 <div class="card-header">
@@ -486,6 +521,7 @@
         </div>
     </div>
     <script src="js/app.js"></script>
+    <script src="js/script_analysis.js"></script>
 </body>
 
 </html>
