@@ -1,268 +1,107 @@
-# 🎬 Veo Ultimate - Gemini Vision Edition
+# 🎬 Veo Ultimate - Advanced AI Video Prompt Generator
 
-A powerful AI-powered video prompt generator for Google's Veo 3, featuring intelligent character analysis with Google Gemini AI and automatic visual style detection.
+**Veo Ultimate** is a professional-grade prompt engineering tool designed for creators using Google's **Veo** video generation AI. It specializes in maintaining **Character Consistency**, ensuring strict **Visual Styles**, and organizing complex narratives into a **Story-based Hierarchy**.
 
-![Visual Style Workflow](visual_style_workflow_1769682812312.png)
-
-## ✨ Features
-
-### 🔮 **AI-Powered Character Analysis**
-
-- Upload character images and get instant AI analysis
-- Powered by Google Gemini 2.5 Flash (FREE)
-- Analyzes 12 character parameters automatically
-- 1500 free requests per day
-
-### 🎨 **Visual Style Detection**
-
-- **Automatic style detection** from uploaded images
-- Supports 7 visual styles:
-  - 📸 Photorealistic / Cinematic
-  - 🧸 3D Animation (Pixar/Disney Style)
-  - 🎌 2D Anime / Manga Style
-  - 🤖 Digital Avatar / AI Character
-  - 🌃 Cyberpunk / Futuristic
-  - 🎨 Oil Painting / Artistic
-  - 🎞️ Vintage Film Look
-- **Style enforcement** across all scenes for perfect consistency
-
-### 🔒 **Character Consistency Mode**
-
-- Maintains character appearance across multiple scenes
-- Stores character descriptions and voice types
-- Enforces consistency rules automatically
-- Perfect for creating multi-scene stories
-
-### 🎙️ **Voice Control**
-
-- 9 voice types (deep male, soft female, child, elderly, divine, etc.)
-- Voice type memory for each character
-- Automatic voice assignment in prompts
-
-### 🎬 **Scene Management**
-
-- Multiple scene types (dialogue, scene change, action)
-- Seamless transitions or fade to black
-- Scene numbering and duration control
-- Environment and lighting presets
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.7+
-- Google Gemini API Key (FREE) - [Get it here](https://aistudio.google.com/app/apikey)
-- Hugging Face API Token (FREE) - [Get it here](https://huggingface.co/settings/tokens)
-
-### Installation
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/priyanshi496/veo-prompt-generator.git
-cd veo-prompt-generator
-```
-
-2. **Install dependencies**
-
-```bash
-pip install -r requirements.txt
-```
-
-3. **Start the backend server**
-
-```bash
-python3 server.py
-```
-
-4. **Start the frontend server** (in a new terminal)
-
-```bash
-python3 -m http.server 8000
-```
-
-5. **Open in browser**
-
-```
-http://localhost:8000/veo.html
-```
-
-## 📖 Usage
-
-### Step 1: Configure API Keys
-
-1. Click "🔑 API Settings" to expand
-2. Enter your Hugging Face API token
-3. Enter your Google Gemini API key
-4. Select your preferred LLM model
-
-### Step 2: Upload Character Image
-
-1. Click "📸 Upload Character Image"
-2. Select an image of your character
-3. Click "🔮 Analyze with Gemini"
-4. AI will automatically:
-   - Detect the visual style
-   - Generate character description
-   - Set the visual style dropdown
-
-### Step 3: Fill Scene Details
-
-1. Enter scene description
-2. Select duration and scene number
-3. Choose scene type (dialogue/scene change/action)
-4. Visual style is auto-selected (or choose manually)
-
-### Step 4: Add Character Details
-
-1. Enter character name
-2. Select voice type
-3. Add consistency rules (optional)
-4. Add dialogue and emotion
-
-### Step 5: Generate Prompt
-
-1. Click "✨ Generate Veo Prompt"
-2. Copy the generated prompt
-3. Use it in Google Veo 3 to create your video!
-
-## 🎯 Use Cases
-
-### Animated Story Series
-
-Upload a Pixar-style character → AI detects "3D Animation" → All scenes maintain consistent 3D aesthetic
-
-### Historical Drama
-
-Upload an oil painting → AI detects "Oil Painting Art Style" → Entire story has painterly, artistic look
-
-### Anime Series
-
-Upload anime character → AI detects "2D Anime Style" → Consistent anime/manga aesthetic throughout
-
-### Photorealistic Film
-
-Upload real photo → AI detects "Cinematic Photorealism" → Professional, realistic video style
-
-## 📁 Project Structure
-
-```
-veo-prompt-generator/
-├── server.py                    # Flask backend with Gemini integration
-├── veo.html                     # Main frontend application
-├── veo_apikey.js               # API key management
-├── requirements.txt            # Python dependencies
-├── .gitignore                  # Git ignore rules
-├── README.md                   # This file
-├── VISUAL_STYLE_FEATURE.md    # Feature documentation
-└── TESTING_GUIDE.md           # Testing instructions
-```
-
-## 🔧 Technical Details
-
-### Backend (server.py)
-
-- **Flask** web server
-- **Google Gemini 2.5 Flash** for image analysis
-- **Hugging Face** LLM integration (Llama 3.3, Qwen 2.5, Phi 3.5)
-- Automatic visual style detection
-- Character description extraction
-
-### Frontend (veo.html)
-
-- Pure HTML/CSS/JavaScript
-- Modern dark theme with gold accents
-- Responsive design
-- Real-time form validation
-- Character memory system
-- Visual style auto-selection
-
-## 🎨 Visual Style Detection
-
-The AI analyzes uploaded images and detects:
-
-1. **Character Details**: Skin tone, eyes, hair, clothing, etc. (12 parameters)
-2. **Visual Style**: Photorealistic, 3D, anime, oil painting, etc.
-
-Both are automatically filled in the form, saving you time!
-
-## 🔒 Character Consistency
-
-The app remembers:
-
-- Character descriptions
-- Voice types
-- Consistency rules
-- Visual style
-
-This ensures perfect continuity across all scenes in your story.
-
-## 📊 API Usage
-
-### Free Tier Limits
-
-- **Google Gemini**: 1500 requests/day (FREE)
-- **Hugging Face**: Generous free tier with rate limits
-
-### Models Supported
-
-- Llama 3.3 70B (Best Quality)
-- Qwen 2.5 72B (Great Alternative)
-- Phi 3.5 Mini (Faster)
-
-## 🐛 Troubleshooting
-
-### Server won't start
-
-```bash
-# Kill any process using port 5001
-lsof -ti:5001 | xargs kill -9
-python3 server.py
-```
-
-### API Key Issues
-
-- Verify your Gemini key at [AI Studio](https://aistudio.google.com/app/apikey)
-- Verify your HF token at [Hugging Face](https://huggingface.co/settings/tokens)
-- Make sure keys are entered correctly (no extra spaces)
-
-### Style Detection Not Working
-
-- Ensure image is clear and high quality
-- Try with different image types
-- Check server console for error messages
-- Manually select style if AI detection fails
-
-## 📚 Documentation
-
-- [Visual Style Feature Guide](VISUAL_STYLE_FEATURE.md)
-- [Testing Guide](TESTING_GUIDE.md)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
-## 👤 Author
-
-**Priyanshi Modi**
-
-- GitHub: [@priyanshi496](https://github.com/priyanshi496)
-- Email: priyanshimodi21@gmail.com
-
-## 🙏 Acknowledgments
-
-- Google Gemini AI for powerful image analysis
-- Hugging Face for LLM infrastructure
-- Google Veo 3 for video generation capabilities
-
-## 🌟 Star History
-
-If you find this project helpful, please consider giving it a star! ⭐
+![Status](https://img.shields.io/badge/Status-Active-success)
+![Python](https://img.shields.io/badge/Backend-Flask-blue)
+![Database](https://img.shields.io/badge/Database-MongoDB_Atlas-green)
+![AI](https://img.shields.io/badge/Powered_by-Gemini_1.5-purple)
 
 ---
 
-**Made with ❤️ for the AI video generation community**
+## ✨ Features
+
+### 🧠 Advanced Memory & consistency
+*   **Story Mode**: Organizes your work into "Stories" with sequential scenes (Prompt History management).
+*   **Scoped Context**: Generates prompt history based strictly on the characters *in the scene*, keeping the database clean.
+*   **Persistent Storage**: Automatically saves all prompts, settings, and characters to **MongoDB Atlas** cloud.
+
+### 🎨 Visual & Character Control
+*   **Gemini Vision Integration**: Upload character sketches/images, and the AI (Gemini 1.5 Flash) will extract precise physical descriptions.
+*   **Style Enforcement**: Force strict styles (e.g., *Pixar 3D*, *Cinematic Photorealism*, *Anime*) across all prompts.
+*   **Dialogue Engine**: Generates precise lip-sync targets and structured dialogue logs for external TTS/Audio tools.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Frontend**: Vanilla HTML5, CSS3 (Modern Dark Mode), JavaScript (ES6).
+*   **Backend**: Python (Flask).
+*   **Database**: MongoDB Atlas (Cloud NoSQL).
+*   **AI Models**:
+    *   **LLM Identity**: Hugging Face (Llama 3, Qwen, Phi).
+    *   **Vision Analysis**: Google Gemini 1.5 Flash.
+
+---
+
+## 📂 Project Structure
+
+```bash
+veo-ultimate/
+├── backend/            # Python Flask Server
+│   ├── app.py          # Main application logic
+│   ├── modules/        # Helper scripts
+│   ├── requirements.txt
+│   └── .env            # (User created) API Keys & DB connection
+├── frontend/           # Client-side UI
+│   ├── index.html
+│   ├── css/
+│   │   └── styles.css
+│   └── js/
+│       └── app.js
+├── start_veo.bat       # One-click launcher for Windows
+└── README.md
+```
+
+---
+
+## 🚀 Installation & Setup
+
+### Prerequisites
+1.  **Python 3.8+** installed.
+2.  A **MongoDB Atlas** account (Free tier is fine).
+    *   Get your connection string: `mongodb+srv://<user>:<password>@cluster...`
+
+### Step 1: Clone & Configure
+1.  Download this repository.
+2.  Navigate to `backend/`.
+3.  Create a file named `.env` and add your MongoDB connection string:
+    ```env
+    MONGODB_URI=mongodb+srv://your_user:your_password@cluster0.xyz.mongodb.net/?retryWrites=true&w=majority
+    ```
+
+### Step 2: Install Dependencies
+Open a terminal in the `backend/` folder:
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### Step 3: Run the App
+**Option A (Windows - Easiest)**:
+*   Double-click `start_veo.bat`.
+
+**Option B (Manual)**:
+1.  Start Backend: `python backend/app.py`
+2.  Open Frontend: Open `frontend/index.html` in your browser.
+
+---
+
+## 📖 How to Use
+
+1.  **API Setup**: Click the "API Settings" dropdown in the UI. Enter your (Free) Hugging Face Token and Google Gemini API Key.
+2.  **Start a Story**: Enter a **Story Title** (Required). This groups all your scenes together.
+3.  **Define Characters**: Upload images of your characters. Gemini will auto-describe them.
+4.  **Consistency Rules**: Add specific rules (e.g., "Always wears a red scarf") to ensure continuity.
+5.  **Generate**: Click "Generate Prompt".
+    *   *Result*: A new scene is added to your Story in the database, and a professional prompt is generated for Veo.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

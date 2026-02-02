@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veo Ultimate - Gemini Vision Edition</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="logo">Veo Ultimate</h1>
+            <p class="tagline">Gemini Vision + Voice Control + Perfect Consistency</p>
+            <span class="free-badge">🔮 Powered by Google Gemini</span>
+        </header>
+
+        <!-- API Settings -->
+        <div class="api-settings">
+            <div class="api-toggle" onclick="toggleApiSettings()">
+                <span>🔑 API Settings (Free)</span>
+                <span id="apiToggleIcon">▼</span>
+            </div>
+            <div class="api-content" id="apiContent">
+                <!-- Hugging Face Token -->
+                <div class="info-box">
+                    <div class="info-title">🤗 Hugging Face (For Prompt Generation)</div>
+                    <ol
+                        style="margin-left: 1.5rem; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <li>Go to <a href="https://huggingface.co/settings/tokens" target="_blank"
+                                style="color: var(--primary);">huggingface.co/settings/tokens</a></li>
+                        <li>Sign up (free, no credit card)</li>
+                        <li>Click "New token" → Name: "Veo", Type: "Read"</li>
+                        <li>Copy token and paste below</li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hugging Face API Token</label>
+                    <input type="password" id="apiKey" class="form-input" placeholder="hf_...">
+                    <p class="form-hint">Used for prompt generation with LLM</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model</label>
+                    <select id="modelSelect" class="form-select">
+                        <option value="meta-llama/Llama-3.3-70B-Instruct">Llama 3.3 70B (Best Quality)</option>
+                        <option value="Qwen/Qwen2.5-72B-Instruct">Qwen 2.5 72B (Great Alternative)</option>
+                        <option value="microsoft/Phi-3.5-mini-instruct">Phi 3.5 Mini (Faster)</option>
+                    </select>
+                </div>
+
+                <!-- Google Gemini Token -->
+                <div class="info-box" style="margin-top: var(--spacing-md);">
+                    <div class="info-title">🔮 Google Gemini (For Image Analysis)</div>
+                    <ol
+                        style="margin-left: 1.5rem; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank"
+                                style="color: var(--primary);">aistudio.google.com/app/apikey</a></li>
+                        <li>Sign in with Google (free)</li>
+                        <li>Click "Create API key" → Choose project or create new</li>
+                        <li>Copy key and paste below</li>
+                        <li><strong>FREE: 1500 requests/day</strong> (more than enough!)</li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Google Gemini API Key</label>
+                    <input type="password" id="geminiKey" class="form-input" placeholder="AIza...">
+                    <p class="form-hint">Used for AI image analysis with Gemini 1.5 Flash</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene Continuity Toggle -->
+        <div class="continuity-mode">
+            <div class="continuity-label">
+                <span>🔒</span>
+                <span>Character Consistency Mode (Enforced)</span>
+            </div>
+            <div class="toggle-switch active" id="continuityToggle" onclick="toggleContinuity()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+
+        <!-- Scene Memory Display -->
+        <div class="scene-memory-box" id="sceneMemoryBox" style="display: none;">
+            <div class="memory-title">
+                <span>💾</span>
+                <span>Stored Character Data:</span>
+            </div>
+            <div class="memory-content" id="memoryContent"></div>
+            <button class="btn-secondary btn-small" style="margin-top: var(--spacing-sm);" onclick="clearMemory()">
+                🗑️ Clear All Character Data
+            </button>
+        </div>
+
+        <div class="main-grid">
+            <!-- Input Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">✨</div>
+                    <h2 class="card-title">Scene Details</h2>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message"></div>
+
+                <!-- Story Metadata -->
+                <div class="form-group">
+                    <label class="form-label" style="color: var(--primary);">📖 Story Title (Required)</label>
+                    <input type="text" id="storyTitle" class="form-input"
+                        placeholder="e.g. The Last Starship - A Space Odyssey">
+                </div>
+
+                <!-- Basic Info -->
+                <div class="form-group">
+                    <label class="form-label">Scene Description</label>
+                    <textarea id="sceneDescription" class="form-textarea"
+                        placeholder="Example: Ashoka reflects on the aftermath of Kalinga war" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Duration</label>
+                        <select id="duration" class="form-select">
+                            <option value="8">8 seconds</option>
+                            <option value="15">15 seconds</option>
+                            <option value="20">20 seconds</option>
+                            <option value="30">30 seconds</option>
+                            <option value="45">45 seconds</option>
+                            <option value="60">60 seconds</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Scene Number</label>
+                        <input type="text" id="sceneNumber" class="form-input" placeholder="1 of 3" value="1 of 3">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Scene Type</label>
+                    <select id="sceneType" class="form-select">
+                        <option value="dialogue">Continuous Dialogue (Seamless)</option>
+                        <option value="scene_change">Scene Change (Fade to Black)</option>
+                        <option value="action">Action Sequence (Seamless)</option>
+                    </select>
+                </div>
+
+
+
+                <!-- PRIMARY CHARACTER WITH IMAGE UPLOAD -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">👤 Primary Character (Gemini AI Analysis)</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content open">
+                        <div class="form-group">
+                            <label class="form-label">🎨 Visual Style / Character Type</label>
+                            <select id="visualStyle" class="form-select">
+                                <option value="Cinematic Photorealism">📸 Photorealistic / Cinematic (Default)</option>
+                                <option value="3D Animation (Pixar/Disney Style)">🧸 3D Animation (Pixar/Disney Style)
+                                </option>
+                                <option value="2D Anime Style">🎌 2D Anime / Manga Style</option>
+                                <option value="Digital AI Avatar">🤖 Digital Avatar / AI Character</option>
+                                <option value="Cyberpunk/Futuristic">🌃 Cyberpunk / Futuristic</option>
+                                <option value="Oil Painting Art Style">🎨 Oil Painting / Artistic</option>
+                                <option value="Vintage Film (1950s)">🎞️ Vintage Film Look</option>
+                            </select>
+                            <p class="form-hint">This style will be applied to the entire story for consistency</p>
+                        </div>
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label class="form-label">📸 Upload Character Image</label>
+                            <div class="image-upload-container" id="primaryImageContainer"
+                                onclick="document.getElementById('primaryImageInput').click()">
+                                <img id="primaryImagePreview" class="image-preview" alt="Character preview">
+                                <div id="primaryUploadText">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Click to upload character image</div>
+                                    <div class="upload-text" style="font-size: 0.8rem; margin-top: 0.25rem;">Gemini AI
+                                        will analyze and describe</div>
+                                </div>
+                            </div>
+                            <input type="file" id="primaryImageInput" accept="image/*"
+                                onchange="handleImageUpload('primary')">
+                            <button class="btn btn-small" id="primaryAnalyzeBtn" onclick="analyzeImage('primary')"
+                                style="display: none; margin-top: 0.5rem;">
+                                🔮 Analyze with Gemini
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Character Name</label>
+                            <input type="text" id="primaryChar" class="form-input" placeholder="e.g., Emperor Ashoka">
+                        </div>
+
+                        <!-- Voice Type -->
+                        <div class="form-group">
+                            <label class="form-label">🎤 Voice Type</label>
+                            <select id="primaryVoice" class="form-select">
+                                <option value="deep_male">Deep Male Voice</option>
+                                <option value="medium_male">Medium Male Voice</option>
+                                <option value="soft_male">Soft/Young Male Voice</option>
+                                <option value="deep_female">Deep Female Voice</option>
+                                <option value="medium_female">Medium Female Voice</option>
+                                <option value="soft_female">Soft/Young Female Voice</option>
+                                <option value="child">Child Voice</option>
+                                <option value="elderly">Elderly Voice</option>
+                                <option value="divine">Divine/Ethereal Voice</option>
+                            </select>
+                            <p class="form-hint">Voice type will be remembered for this character</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Character Description</label>
+                            <textarea id="charDescription" class="form-textarea"
+                                placeholder="Will be auto-filled by Gemini AI analysis, or type manually"
+                                rows="3"></textarea>
+                            <p class="form-hint">Gemini will fill this automatically from uploaded image</p>
+                        </div>
+
+                        <!-- Consistency Rules -->
+                        <div class="form-group">
+                            <label class="form-label">🔒 Consistency Rules (Fixed Attributes)</label>
+                            <textarea id="primaryConsistencyRules" class="form-textarea" placeholder="Example:
+- Always wear royal Mauryan attire with golden patterns
+- Maintain scar above left eyebrow from battle
+- Keep contemplative, thoughtful expressions
+- Golden crown remains consistently visible
+- Eyes always dark brown with depth and wisdom
+- Royal bearing and confident posture" rows="6"></textarea>
+                            <div class="consistency-rules-box">
+                                <strong>💡 Consistency Rules:</strong> These attributes will NEVER change across all
+                                scenes. They're enforced in every prompt to ensure perfect character continuity.
+                            </div>
+                        </div>
+
+                        <!-- Primary Character Dialogue -->
+                        <div class="form-group">
+                            <label class="form-label">💬 Dialogue (Optional)</label>
+                            <textarea id="primaryDialogue" class="form-textarea"
+                                placeholder="Hindi dialogue for this character" rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Emotion/Delivery</label>
+                            <select id="primaryEmotion" class="form-select">
+                                <option value="neutral">Neutral/Calm</option>
+                                <option value="contemplative">Contemplative/Reflective</option>
+                                <option value="wise">Wise/Teaching</option>
+                                <option value="sorrowful">Sorrowful/Regretful</option>
+                                <option value="determined">Determined/Resolute</option>
+                                <option value="compassionate">Compassionate/Gentle</option>
+                                <option value="angry">Angry/Furious</option>
+                                <option value="joyful">Joyful/Happy</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECONDARY CHARACTER WITH IMAGE UPLOAD -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">👥 Secondary Character (Optional)</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-group">
+                            <label class="form-label">🎨 Visual Style / Character Type</label>
+                            <select id="secondaryVisualStyle" class="form-select">
+                                <option value="Cinematic Photorealism">📸 Photorealistic / Cinematic (Default)</option>
+                                <option value="3D Animation (Pixar/Disney Style)">🧸 3D Animation (Pixar/Disney Style)
+                                </option>
+                                <option value="2D Anime Style">🎌 2D Anime / Manga Style</option>
+                                <option value="Digital AI Avatar">🤖 Digital Avatar / AI Character</option>
+                                <option value="Cyberpunk/Futuristic">🌃 Cyberpunk / Futuristic</option>
+                                <option value="Oil Painting Art Style">🎨 Oil Painting / Artistic</option>
+                                <option value="Vintage Film (1950s)">🎞️ Vintage Film Look</option>
+                            </select>
+                        </div>
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label class="form-label">📸 Upload Character Image</label>
+                            <div class="image-upload-container" id="secondaryImageContainer"
+                                onclick="document.getElementById('secondaryImageInput').click()">
+                                <img id="secondaryImagePreview" class="image-preview" alt="Character preview">
+                                <div id="secondaryUploadText">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Click to upload character image</div>
+                                    <div class="upload-text" style="font-size: 0.8rem; margin-top: 0.25rem;">Gemini AI
+                                        will analyze</div>
+                                </div>
+                            </div>
+                            <input type="file" id="secondaryImageInput" accept="image/*"
+                                onchange="handleImageUpload('secondary')">
+                            <button class="btn btn-small" id="secondaryAnalyzeBtn" onclick="analyzeImage('secondary')"
+                                style="display: none; margin-top: 0.5rem;">
+                                🔮 Analyze with Gemini
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Character Name</label>
+                            <input type="text" id="secondaryChar" class="form-input" placeholder="e.g., Buddhist Monk">
+                        </div>
+
+                        <!-- Voice Type -->
+                        <div class="form-group">
+                            <label class="form-label">🎤 Voice Type</label>
+                            <select id="secondaryVoice" class="form-select">
+                                <option value="deep_male">Deep Male Voice</option>
+                                <option value="medium_male">Medium Male Voice</option>
+                                <option value="soft_male">Soft/Young Male Voice</option>
+                                <option value="deep_female">Deep Female Voice</option>
+                                <option value="medium_female">Medium Female Voice</option>
+                                <option value="soft_female">Soft/Young Female Voice</option>
+                                <option value="elderly">Elderly Voice</option>
+                                <option value="divine">Divine/Ethereal Voice</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Character Description</label>
+                            <textarea id="secondaryCharDescription" class="form-textarea"
+                                placeholder="Will be auto-filled by Gemini or type manually" rows="2"></textarea>
+                        </div>
+
+                        <!-- Consistency Rules -->
+                        <div class="form-group">
+                            <label class="form-label">🔒 Consistency Rules (Optional)</label>
+                            <textarea id="secondaryConsistencyRules" class="form-textarea"
+                                placeholder="Fixed attributes for this character" rows="4"></textarea>
+                        </div>
+
+                        <!-- Secondary Character Dialogue -->
+                        <div class="form-group">
+                            <label class="form-label">💬 Dialogue (Optional)</label>
+                            <textarea id="secondaryDialogue" class="form-textarea" placeholder="Hindi dialogue"
+                                rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Emotion/Delivery</label>
+                            <select id="secondaryEmotion" class="form-select">
+                                <option value="neutral">Neutral/Calm</option>
+                                <option value="wise">Wise/Peaceful</option>
+                                <option value="humble">Humble/Respectful</option>
+                                <option value="concerned">Concerned</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Container for dynamically added characters -->
+                <div id="extraCharactersContainer"></div>
+
+                <div class="form-group" style="text-align: center; margin-bottom: var(--spacing-md);">
+                    <button class="btn btn-secondary btn-small" onclick="addCharacter()">
+                        ➕ Add Another Character
+                    </button>
+                </div>
+
+                <!-- NARRATOR / VOICEOVER -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">🎙️ Narrator / Voiceover</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Voice Gender</label>
+                                <select id="narratorGender" class="form-select">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Voice Tone</label>
+                                <select id="narratorTone" class="form-select">
+                                    <option value="deep">Deep / Heavy</option>
+                                    <option value="sad">Sad / Melancholic</option>
+                                    <option value="scared">Scared / Trembling</option>
+                                    <option value="epic">Epic / Movie Trailer</option>
+                                    <option value="whisper">Whisper / Mysterious</option>
+                                    <option value="neutral">Neutral / Documentary</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Narration Text</label>
+                            <textarea id="narratorText" class="form-textarea"
+                                placeholder="Enter the voiceover narration here..." rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Environment -->
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection(this)">
+                        <span class="collapsible-title">🌍 Environment</span>
+                        <span class="collapsible-toggle">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-group">
+                            <label class="form-label">Setting</label>
+                            <input type="text" id="setting" class="form-input"
+                                placeholder="e.g., Battlefield aftermath at dusk">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Time of Day</label>
+                                <select id="timeOfDay" class="form-select">
+                                    <option value="day">Day</option>
+                                    <option value="dawn">Dawn</option>
+                                    <option value="dusk">Dusk</option>
+                                    <option value="night">Night</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lighting</label>
+                                <select id="lighting" class="form-select">
+                                    <option value="golden_hour">Golden Hour</option>
+                                    <option value="dramatic">Dramatic</option>
+                                    <option value="soft_diffused">Soft Diffused</option>
+                                    <option value="harsh">Harsh</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn" onclick="generatePrompt()">
+                        ✨ Generate Prompt
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearForm()">
+                        🔄 Next Scene
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="card" id="outputCard">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <h2 class="card-title">Generated Prompt</h2>
+                </div>
+
+                <div class="output-container">
+                    <button class="copy-btn" id="copyBtn" onclick="copyPrompt()" style="display: none;">
+                        📋 Copy
+                    </button>
+
+                    <div class="output-placeholder" id="outputPlaceholder">
+                        <div class="output-placeholder-icon">🎬</div>
+                        <p>Your prompt will appear here</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Upload character images and generate!</p>
+                    </div>
+
+                    <div class="loading" id="loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">AI is working...</p>
+                    </div>
+
+                    <pre class="output-text" id="outputText"></pre>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn" onclick="downloadPrompt()" id="downloadBtn" style="display: none;">
+                        💾 Download
+                    </button>
+                    <button class="btn btn-secondary" onclick="openVeo()" id="veoBtn" style="display: none;">
+                        🚀 Open Veo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

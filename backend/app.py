@@ -1,11 +1,161 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from pymongo import MongoClient
 import requests
 import json
-import base64
+import os
+from dotenv import load_dotenv
+import certifi
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# Database Configuration
+MONGO_URI = os.getenv('MONGODB_URI')
+try:
+    client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+    
+    db = client['veo_prompt_generator']
+    # SINGLE COLLECTION for everything
+    user_data_collection = db['user_data']
+    
+except Exception as e:
+    print(f"Error connecting to MongoDB: {e}")
+    db = None 
+
+from datetime import datetime
+
+# --- Routes ---
+
+@app.route("/api/stories", methods=["GET"])
+def get_stories():
+    """Retrieve all stories with their minimal metadata (no huge scene details)"""
+    if db is None:
+        return jsonify({"error": "Database not connected"}), 500
+        
+    try:
+        # Fetch story titles and timestamps
+        stories = list(user_data_collection.find({}, {"title": 1, "created_at": 1, "scenes_count": {"$size": "$scenes"}}))
+        for s in stories:
+            if '_id' in s: s['_id'] = str(s['_id'])
+            
+        return jsonify(stories)
+    except Exception as e:
+        print(f"Error in GET /api/stories: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/memory", methods=["GET"])
+def get_memory():
+    """Retrieve the LATEST scene state from the most recently updated story"""
+    if db is None:
+        return jsonify({"error": "Database not connected"}), 500
+        
+    try:
+        # Find the single most recently updated story
+        latest_story = user_data_collection.find_one(sort=[('last_updated', -1)])
+        
+        if latest_story and latest_story.get('scenes'):
+            # Get the very last scene added to this story
+            last_scene = latest_story['scenes'][-1]
+            
+            # Construct the state object expected by frontend
+            state = {
+                "enabled": True, # Default to true if loaded
+                "storyTitle": latest_story.get('title', ''),
+                "sceneNumber": last_scene.get('scene_number', 1),
+                "currentSceneDescription": last_scene.get('description', ''),
+                "lastGeneratedPrompt": last_scene.get('generated_prompt', ''),
+                "setting": last_scene.get('setting', ''),
+                "lighting": last_scene.get('lighting', ''),
+                "timeOfDay": last_scene.get('time_of_day', ''),
+                "characters": last_scene.get('characters', {})
+            }
+            return jsonify(state)
+        else:
+            # Return empty default state
+            return jsonify({
+                "enabled": True,
+                "storyTitle": "",
+                "characters": {},
+                "setting": "",
+                "lighting": "",
+                "timeOfDay": ""
+            })
+            
+    except Exception as e:
+        print(f"Error in GET /api/memory: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/memory", methods=["POST"])
+def save_memory():
+    """Save a SCENE to a STORY (Create story if new, append scene if exists)"""
+    if db is None:
+        return jsonify({"error": "Database not connected"}), 500
+
+    try:
+        data = request.json
+        story_title = data.get('storyTitle', '').strip()
+        
+        if not story_title:
+             return jsonify({"error": "Story Title is required"}), 400
+
+        # Prepare the scene object
+        current_scene = {
+            "scene_number": data.get('sceneNumber', 1),
+            "description": data.get('currentSceneDescription', ''),
+            "generated_prompt": data.get('lastGeneratedPrompt', ''),
+            "characters": data.get('characters', {}),
+            "setting": data.get('setting', ''),
+            "lighting": data.get('lighting', ''),
+            "time_of_day": data.get('timeOfDay', ''),
+            "created_at": datetime.utcnow()
+        }
+
+        # Check if story exists (Case insensitive check could be better, but simple match for now)
+        existing_story = user_data_collection.find_one({"title": story_title})
+        
+        if existing_story:
+            # APPEND to existing story
+            user_data_collection.update_one(
+                {"_id": existing_story["_id"]},
+                {
+                    "$push": {"scenes": current_scene},
+                    "$set": {"last_updated": datetime.utcnow()}
+                }
+            )
+            message = f"Scene added to existing story: '{story_title}'"
+        else:
+            # CREATE new story document
+            new_story = {
+                "title": story_title,
+                "created_at": datetime.utcnow(),
+                "last_updated": datetime.utcnow(),
+                "scenes": [current_scene]
+            }
+            user_data_collection.insert_one(new_story)
+            message = f"New story created: '{story_title}' with first scene"
+
+        return jsonify({"status": "success", "message": message})
+        
+    except Exception as e:
+        print(f"Error in POST /api/memory: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/reset", methods=["POST"])
+def reset_memory():
+    """Clear ALL stories? Limit to specific story?"""
+    # For safety, let's keep it to clearing everything logic for now or disable it
+    if db is None:
+         return jsonify({"error": "Database not connected"}), 500
+    
+    # user_data_collection.delete_many({}) # Dangerous!
+    return jsonify({"status": "error", "message": "Reset all disabled for safety in Story Mode"})
+
 
 @app.route("/generate", methods=["POST"])
 def generate():
@@ -278,19 +428,13 @@ START YOUR ANALYSIS NOW:
 
 if __name__ == "__main__":
     print("\n" + "="*60)
-    print("🚀 VEO ULTIMATE GENERATOR - GEMINI VISION EDITION")
+    print("🚀 VEO ULTIMATE GENERATOR - MONGODB EDITION")
     print("="*60)
     print("\n📋 Available Endpoints:")
-    print("  - POST /generate       → Generate Veo prompts (Hugging Face)")
-    print("  - POST /analyze_image  → Analyze images (Google Gemini)")
-    print("\n💡 Image Analysis:")
-    print("  ✓ Uses Google Gemini 1.5 Flash (FREE)")
-    print("  ✓ Excellent vision capabilities")
-    print("  ✓ Fast & reliable")
-    print("  ✓ 1500 requests/day free tier")
-    print("\n🔑 Get FREE Gemini API key:")
-    print("  → https://makersuite.google.com/app/apikey")
-    print("  → https://aistudio.google.com/app/apikey")
+    print("  - POST /generate       → Generate Veo prompts")
+    print("  - POST /analyze_image  → Analyze images")
+    print("  - GET  /api/memory     → Load state from MongoDB")
+    print("  - POST /api/memory     → Save state to MongoDB")
     print("\n🌐 Server running on: http://localhost:5001")
     print("="*60 + "\n")
     
