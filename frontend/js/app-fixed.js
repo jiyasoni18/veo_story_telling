@@ -6,7 +6,8 @@ let sceneMemory = {
     lighting: '',
     timeOfDay: '',
     currentSceneDescription: '',
-    lastGeneratedPrompt: ''
+    lastGeneratedPrompt: '',
+    storyContext: ''
 };
 
 let uploadedImages = {
@@ -24,6 +25,8 @@ async function loadMemory() {
 
         if (data) {
             sceneMemory = data; // Note: Loading essentially resets session to the snapshot state
+            if (!sceneMemory.storyContext) sceneMemory.storyContext = ''; // Ensure field exists
+
 
             // Populate basic fields
             if (data.storyTitle) document.getElementById('storyTitle').value = data.storyTitle;
@@ -59,6 +62,11 @@ async function saveMemory(specificData = null) {
 
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Failed to save');
+
+        if (result.storyContext) {
+            sceneMemory.storyContext = result.storyContext;
+            console.log('Story context updated from DB');
+        }
 
         updateMemoryDisplay();
         console.log('Memory saved to DB');
@@ -795,8 +803,12 @@ VISUAL STYLE: ${formData.visualStyle}
 [GLOBAL AUDIO RULE]
 Narrator voice must always remain off-screen and never attach to any character or face mesh.
 
-[TIMING CONSTRAINT]
 The generated script and timeline MUST NOT exceed 8 seconds. All action must conclude by 00:08.
+
+[PREVIOUS STORY CONTEXT]
+${sceneMemory.storyContext || 'No previous scenes.'}
+Use this context to ensure smooth continuity from previous scenes.
+
 
 PRIMARY CHARACTER:
 Name: ${formData.primaryChar || 'Not specified'}
@@ -986,4 +998,454 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     loadMemory();
+    // Initialize veggie options (in case browser cached selection)
+    if (document.getElementById('vegTopic')) {
+        updateVegOptions();
+        document.getElementById('vegTopic').addEventListener('change', updateVegOptions);
+    }
 });
+
+// --- NEW FUNCTIONALITY: VEGETABLE MODE ---
+
+function updateVegOptions() {
+    const topic = document.getElementById('vegTopic').value;
+    const sceneSelect = document.getElementById('vegSceneNum');
+
+    if (topic === 'side_effects') {
+        sceneSelect.options[0].text = "Part 1: Deceptive Hook (Intro)";
+        sceneSelect.options[1].text = "Part 2: Internal Body Damage (The Visual)";
+        sceneSelect.options[2].text = "Part 3: The Consequence (Mocking)";
+    } else {
+        sceneSelect.options[0].text = "Part 1: Intro & First Benefit";
+        sceneSelect.options[1].text = "Part 2: More Benefits & Humor";
+        sceneSelect.options[2].text = "Part 3: Conclusion & Call to Action";
+    }
+}
+
+function switchMode(mode) {
+    const storyContainer = document.getElementById('storyModeContainer');
+    const vegContainer = document.getElementById('vegetableModeContainer');
+    const adContainer = document.getElementById('advertisementModeContainer');
+    const btnStory = document.getElementById('btn-mode-story');
+    const btnVeg = document.getElementById('btn-mode-vegetable');
+    const btnAd = document.getElementById('btn-mode-ad');
+
+    const mainGrid = document.querySelector('.main-grid');
+
+    if (mode === 'story') {
+        storyContainer.style.display = 'block';
+        vegContainer.style.display = 'none';
+        adContainer.style.display = 'none';
+        btnStory.classList.add('active');
+        btnVeg.classList.remove('active');
+        btnAd.classList.remove('active');
+        mainGrid.classList.remove('full-width'); // Side-by-side for Story
+        showStatus('📖 Switched to Story Mode', 'info');
+    } else if (mode === 'vegetable') {
+        if (document.getElementById('btnNextVegPartOutput')) {
+            document.getElementById('btnNextVegPartOutput').style.display = 'none';
+        }
+        storyContainer.style.display = 'none';
+        vegContainer.style.display = 'block';
+        adContainer.style.display = 'none';
+        btnStory.classList.remove('active');
+        btnVeg.classList.add('active');
+        btnAd.classList.remove('active');
+        mainGrid.classList.add('full-width'); // Full width (stacked) for Veggie
+        showStatus('🥦 Switched to Talking Vegetable Mode', 'success');
+    } else if (mode === 'advertisement') {
+        storyContainer.style.display = 'none';
+        vegContainer.style.display = 'none';
+        adContainer.style.display = 'block';
+        btnStory.classList.remove('active');
+        btnVeg.classList.remove('active');
+        btnAd.classList.add('active');
+        mainGrid.classList.add('full-width'); // Full width for Advertisement
+        showStatus('📺 Switched to Advertisement Mode', 'info');
+    }
+}
+
+async function generateVegetablePrompt() {
+
+
+    const name = document.getElementById('vegName').value.trim();
+    // const expression = document.getElementById('vegExpression').value; // Hidden now
+    const scenario = document.getElementById('vegScenario').value.trim();
+    const style = document.getElementById('vegStyle').value;
+    const sceneNum = document.getElementById('vegSceneNum').value;
+    const topic = document.getElementById('vegTopic').value;
+
+    // Auto-Set Emotion based on Topic
+    let expression = 'happy';
+    if (topic === 'side_effects') {
+        expression = 'angry'; // Side effects are aggressive/warning
+    } else {
+        expression = 'happy'; // Benefits are cheerful
+    }
+
+    if (!name) {
+        showStatus('Please give your vegetable a name!', 'error');
+        return;
+    }
+
+    // Reset Next Button
+    document.getElementById('btnNextVegPart').style.display = 'none';
+    if (document.getElementById('btnNextVegPartOutput')) {
+        document.getElementById('btnNextVegPartOutput').style.display = 'none';
+    }
+
+    // UI Loading State
+    document.getElementById('outputPlaceholder').style.display = 'none';
+    document.getElementById('outputText').classList.remove('visible');
+    document.getElementById('loading').classList.add('visible');
+    document.getElementById('copyBtn').style.display = 'none';
+    document.getElementById('downloadBtn').style.display = 'none';
+    document.getElementById('veoBtn').style.display = 'none';
+
+    try {
+        const model = document.getElementById('modelSelect').value;
+
+        // Dynamic Tone & Style Definitions based on Expression
+        let toneDesc = "";
+        let dialogueStyle = "";
+        let hindiExample = "";
+
+        switch (expression) {
+            case 'happy':
+                toneDesc = "Ecstatic, joyful, high energy, upbeat, very positive.";
+                dialogueStyle = "Dialogue should be extremely enthusiastic. Focus on the joy of being healthy/tasty.";
+                hindiExample = "Arre waah! Main toh superfood hoon! Mujhe khaoge toh superman ban jaoge!";
+                break;
+            case 'funny':
+                toneDesc = "Witty, sarcastic, pun-filled, comedic, cheeky.";
+                dialogueStyle = "Dialogue MUST be a joke, a pun, or a roast. Make it laugh-out-loud funny.";
+                hindiExample = "Main itna cool hoon ki fridge bhi mujhe dekh ke jal jaata hai!";
+                break;
+            case 'angry':
+                toneDesc = "Stern, Serious, Warning, Dark, Authoritative.";
+                dialogueStyle = "The character warns the human about their poor choices. It speaks with INTENSITY and AUTHORITY, but not uncontrollable screaming. Like a strict teacher or villain.";
+                hindiExample = "Main hoon Karela. Darta kyu hai? Meri kadwahat hi tera ilaaj hai.";
+                break;
+            case 'sad':
+                toneDesc = "Tragic, weeping, depressed, emotional, melodramatic.";
+                dialogueStyle = "Dialogue MUST be sorrowful. Crying about its fate. Begging not to be cut/eaten. Use 'Haye Ram' or similar.";
+                hindiExample = "Haye... meri kismat toh dekho... bas ab soup banna hi likha hai... (sobbing)";
+                break;
+            case 'scared':
+                toneDesc = "Terrified, trembling, panic-stricken, stammering.";
+                dialogueStyle = "Dialogue should show panic. Stuttering, asking for mercy.";
+                hindiExample = "N-n-nahi! Wo... wo chaku neeche rakho! Mujhe dar lag raha hai!";
+                break;
+            case 'wise':
+                toneDesc = "Old, slow, philosophical, grand, grandmotherly/grandfatherly.";
+                dialogueStyle = "Dialogue should sound like an old wise person giving advice.";
+                hindiExample = "Beta, meri baat suno... jo hari sabzi khata hai, wahi lambi umar paata hai.";
+                break;
+            case 'surprised':
+                toneDesc = "Shocked, gasping, disbelief, wide-eyed.";
+                dialogueStyle = "Dialogue should express total disbelief at a fact or situation.";
+                hindiExample = "Hain?? Sach mein?? Mujhe toh pata hi nahi tha main itna faydemand hoon!";
+                break;
+            default:
+                toneDesc = "Friendly, engaging, nice, witty.";
+                dialogueStyle = "Standard friendly explanation.";
+        }
+
+        // Context for the specific part of the 24s video
+        // Context for the specific part of the 24s video
+
+
+        // Context for the specific part of the 24s video
+        // Determine Total Parts
+        const totalParts = document.getElementById('vegDuration').value;
+
+        // Context for the specific part
+        let partContext = "";
+
+        // --- TOPIC: BENEFITS (Classic Mode) ---
+        if (topic === 'benefits') {
+            if (sceneNum === "1") {
+                partContext = `PART 1 of ${totalParts} (INTRO). 
+                Content: The character MUST start by saying "Main hoon ${name}" (I am ${name}). Then grab attention.
+                Constraint: Do NOT list all benefits yet. Establish identity first.
+                Context: ${dialogueStyle}`;
+            } else if (sceneNum == totalParts) {
+                partContext = `PART ${sceneNum} of ${totalParts} (CONCLUSION). 
+                Content: Final ultimatum. "Eat me or else!" or "Please pick me!".
+                Constraint: Do NOT start a new topic. Wrap up the rant/speech with a strong punchline.
+                Context: ${toneDesc}`;
+            } else {
+                const transitionNote = sceneNum === "2"
+                    ? "TRANSITION: The scene smoothly transitions from the intro setting. The character may move/float/zoom into the new environment."
+                    : "TRANSITION: Continue from previous part's environment.";
+
+                partContext = `PART ${sceneNum} of ${totalParts} (VALUE & CONFLICT). 
+                ${transitionNote}
+                Content: The character mentions a SPECIFIC weird benefit (e.g. 'I clean your insides') or compares to junk food.
+                Constraint: Do NOT re-introduce the character. Move the story forward.
+                Context: ${toneDesc}`;
+            }
+
+            // --- TOPIC: SIDE EFFECTS (Warning Mode) ---
+        } else {
+            // Side Effects Logic
+            if (sceneNum === "1") {
+                partContext = `PART 1 of ${totalParts} (DECEPTIVE HOOK). 
+                Content: The character MUST start by saying "Main hoon ${name}" (I am ${name}). Then hint at danger.
+                Constraint: Introduce the item as a temptation/danger.
+                Context: ${dialogueStyle}`;
+            } else if (sceneNum == totalParts) {
+                partContext = `PART ${sceneNum} of ${totalParts} (CONSEQUENCE). 
+                Content: The character mocks the user for the long-term consequences (obesity, diabetes).
+                Constraint: A final warning or mocking laugh.
+                Context: ${toneDesc}`;
+            } else {
+                const transitionNote = sceneNum === "2"
+                    ? "TRANSITION: The character ENTERS the human body. Show a smooth zoom/dive transition from external to internal view (e.g., camera follows character shrinking and entering through mouth/skin, traveling through throat into bloodstream)."
+                    : "TRANSITION: Continue inside the body from previous organ/system. Character moves to a different internal location.";
+
+                partContext = `PART ${sceneNum} of ${totalParts} (INTERNAL BODY DAMAGE). 
+                ${transitionNote}
+                Content: The character (${name}) is depicted INSIDE the human body, actively causing damage.
+                VISUAL REQUIREMENT: 
+                - SETTING: Microscopic view inside a human organ (veins, heart, brain, liver) affected by ${name}.
+                - ACTION: Show ${name} particles or the character physically harming cells (e.g., Sugar crystals cutting veins, Fat blocking arteries, Salt drying out cells). 
+                - CHARACTER: The main ${name} character is floating in this internal space, commanding the destruction or laughing at the damage.
+                - STYLE: Medical Animation / realistic biological texture mixed with the character's style.
+                Context: Describing the immediate physiological harm.`;
+            }
+        }
+
+        // Determine Language
+        const languageMode = document.getElementById('vegLanguage').value;
+        const languageName = (languageMode === 'english') ? "ENGLISH" : "HINDI (Devanagari)";
+        const dialoguePlaceholder = (languageMode === 'english') ? "[English Dialogue Here]" : "[Hindi Dialogue Here]";
+        const styleExample = (languageMode === 'english')
+            ? "Hey! Put down those flavorless chips! I am standing right here!"
+            : hindiExample;
+
+        // Determine Voice
+        const voiceType = document.getElementById('vegVoice').value;
+        const voiceDescMap = {
+            'male_deep': "Deep, resonant, strong MALE voice",
+            'male_medium': "Casual, conversational MALE voice",
+            'male_soft': "Gentle, soft-spoken MALE voice",
+            'female_deep': "Mature, deep FEMALE voice",
+            'female_medium': "Casual, conversational FEMALE voice",
+            'female_soft': "Sweet, soft-spoken FEMALE voice",
+            'child_male': "Young BOY voice",
+            'child_female': "Young GIRL voice",
+            'cartoon_squeaky': "High-pitched, funny CARTOON squeaky voice"
+        };
+        const voiceDescription = voiceDescMap[voiceType] || "Distinctive voice";
+
+        // Construct Voice ID based on selection to ensure consistency
+        const voiceIdPrefix = `${name.toLowerCase().replace(/\s/g, '_')}_${voiceType}`;
+
+        const systemPrompt = `You are a creative scriptwriter for animated shorts.
+Task: Create a script for Part ${sceneNum} of a ${totalParts}-part series.
+Character: ${name} (A living, talking ingredient).
+Emotion: ${expression} (Strictly enforced).
+
+IMPORTANT: Return PLAIN TEXT. Do not wrap the entire response in \`\`\`json or \`\`\` code blocks.
+
+DEEP CHARACTER ANALYSIS REQUIRED:
+1. Combine the INGREDIENT (${name}) with the EMOTION (${expression}).
+   - Example: An 'Angry Chili' burns with rage. An 'Angry Banana' might slip up or go bruised/mushy with anger.
+   - Example: A 'Happy Ice Cream' melts with joy. A 'Happy Broccoli' feels fresh and crunchy.
+2. The dialogue MUST reflect this specific combination.
+   - Do NOT just write generic angry/happy lines. Write lines that ONLY a ${name} would say.
+
+CRITICAL REQUIREMENTS:
+1. Aspect Ratio: 9:16 (Vertical).
+2. Language: Dialogue MUST be in Simple, Conversational ${languageName}.
+   - USE: Everyday phrases, slang, and simple words (like friends talking).
+   - AVOID: Formal/Pure Hindi (Shuddh Hindi), poetic words, or dramatic book language (e.g., words like 'kahar', 'ragon', 'lubhavni', 'kshan').
+   - Keep it CASUAL and PUNCHY. 
+3. Tone: ${toneDesc}
+4. Context: ${dialogueStyle}
+
+[REQUIRED OUTPUT FORMAT]
+Visual Prompt: CINEMATIC DIRECTING - EXPRESSION & ENVIRONMENT ONLY.
+
+CRITICAL: DO NOT describe the character's physical appearance (shape, color, texture, features). The character is already defined as "${name}".
+
+ONLY DESCRIBE:
+1. BACKGROUND/SETTING: ${topic === 'side_effects' ? 'Dark, ominous, medical/internal body environment (veins, organs, cells).' : 'Bright, clean kitchen or abstract healthy glow/aura.'}
+2. EMOTIONAL EXPRESSION: How the character's body language shows ${expression} emotion (e.g., trembling with rage, bouncing with joy, slumping sadly).
+3. ACTION/GESTURE: Specific movements that MATCH the dialogue (e.g., pointing accusingly, making warning gestures, celebrating, threatening).
+4. TRANSITION/CONTINUITY: 
+   - For Part 1: Establish the starting environment.
+   - For Part 2+: Describe HOW the scene transitions from the previous part (e.g., "camera zooms in", "character floats/moves to new location", "environment morphs/shifts"). 
+   - NEVER abruptly cut to a completely different scene. Show the journey/movement.
+
+Example Format: "The character floats in a dark vein filled with red blood cells. It gestures menacingly while speaking, pointing at damaged cells. Expression: sinister grin with narrowed eyes."
+
+Dialogue (${languageName}): "[Unique ${languageName} Dialogue reflecting ${name}'s personality]"
+
+[SCENE METADATA]
+Duration: 8 seconds (STRICT)
+Aspect Ratio: 9:16
+
+[AUDIO STYLE]
+Voice: ${voiceDescription}. MUST BE CONSISTENT. Pitch/Timbre: ${voiceType}. Emotion: ${expression}.
+Background: Consistent ambient. Match emotion.
+
+[LIP SYNC DATA]
+0.0s-8.0s
+Speaker: ${name.toLowerCase().replace(/\s/g, '_')}
+Voice ID: ${voiceIdPrefix}
+Lip Sync Target: ${name.toLowerCase().replace(/\s/g, '_')}_face_mesh
+Text: "${dialoguePlaceholder}"
+`;
+
+
+        // Create Dynamic Instructions based on Topic
+        let topicInstructions = "";
+        if (topic === 'side_effects') {
+            topicInstructions = `
+            CRITICAL INSTRUCTIONS (SIDE EFFECTS MODE):
+            1. Identify 3 specific NEGATIVE SIDE EFFECTS/HEALTH RISKS of eating ${name} (e.g. obesity, tooth decay, diabetes).
+            2. The dialogue must be about how ${name} HARMS the human body.
+            3. DO NOT MENTION BENEFITS. This is a WARNING video.
+            4. If the emotion is Happy, be arrogantly happy about causing harm.
+            `;
+        } else {
+            topicInstructions = `
+            CRITICAL INSTRUCTIONS (BENEFITS MODE):
+            1. Identify 3 specific HEALTH BENEFITS of ${name}. Use ONE different benefit for this specific part's dialogue.
+            2. The dialogue must be about how ${name} HELPS the human body.
+            3. DO NOT use generic terms (e.g. say "Potassium" or "Vitamin C").
+            `;
+        }
+
+        const userPrompt = `Generate the prompt for Part ${sceneNum}.
+Ingredient: ${name}
+Topic: ${topic === 'side_effects' ? 'Negative Side Effects/Health Risks' : 'Health Benefits'}
+Target Emotion: ${expression.toUpperCase()} (${toneDesc})
+Scenario: ${scenario || (topic === 'side_effects' ? 'Warning about health risks' : 'Explaining benefits')}
+Specific Instructions: ${partContext}
+
+${topicInstructions}
+
+CRITICAL RULES:
+1. DIALOGUE TIMING: The dialogue MUST be concise (approx 15-20 words) to fit STRICTLY within 8 seconds. Do NOT write long speeches.
+2. VISUAL CONTINUITY: The Visual Prompt must describe a scene that flows seamlessly. Do NOT fade to black unless it is Part ${totalParts} (the final part).
+3. The dialogue must be completely UNIQUE and in ${languageName}.
+4. DO NOT COPY ANY EXAMPLES. Create fresh dialogue based on the emotion and the topic.
+
+Example of Style (DO NOT COPY TEXT, ONLY TONE): "${styleExample}"
+ENSURE the valid JSON-like lip sync block is included at the end.`;
+
+        // Check for Gemini Key first
+        const geminiKey = document.getElementById('geminiKey').value.trim();
+        const hfKey = document.getElementById('apiKey').value.trim();
+
+        // Determine Provider
+        let effectiveToken = hfKey;
+        let provider = 'huggingface';
+        let finalPrompt = `<|system|>${systemPrompt}</s><|user|>${userPrompt}</s><|assistant|>`;
+
+        if (geminiKey) {
+            effectiveToken = geminiKey;
+            provider = 'gemini';
+            // Gemini doesn't need the special tokens, just clear instructions
+            finalPrompt = `SYSTEM INSTRUCTION:\n${systemPrompt}\n\nUSER REQUEST:\n${userPrompt}`;
+        } else if (!hfKey) {
+            showStatus('Please enter either a Gemini API Key (Preferred) or Hugging Face Token!', 'error');
+            toggleApiSettings();
+            return;
+        }
+
+        const response = await fetch('http://localhost:5001/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: effectiveToken,
+                model: model,
+                prompt: finalPrompt,
+                provider: provider
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Generation failed');
+        }
+
+        const data = await response.json();
+        let generatedPrompt = '';
+
+        if (Array.isArray(data) && data[0]?.generated_text) {
+            generatedPrompt = data[0].generated_text;
+        } else if (data.generated_text) {
+            generatedPrompt = data.generated_text;
+        }
+
+        // Clean up Markdown code blocks if Gemini wraps the response
+        generatedPrompt = generatedPrompt.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+        document.getElementById('loading').classList.remove('visible');
+        document.getElementById('outputText').textContent = generatedPrompt;
+        document.getElementById('outputText').classList.add('visible');
+        document.getElementById('copyBtn').style.display = 'block';
+        document.getElementById('downloadBtn').style.display = 'inline-flex';
+        document.getElementById('veoBtn').style.display = 'inline-flex';
+
+        showStatus(`🥦 Part ${sceneNum} Prompt Generated!`, 'success');
+
+        // Scroll to output
+        document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Handle Next Part Button Logic
+        // Handle Next Part Button Logic
+        const nextBtn = document.getElementById('btnNextVegPart');
+        const nextBtnOutput = document.getElementById('btnNextVegPartOutput');
+        const currentPart = parseInt(sceneNum);
+        const maxParts = parseInt(totalParts);
+
+        if (currentPart < maxParts) {
+            const btnText = `Next Part (${currentPart + 1}/${maxParts}) ➡️`;
+
+            nextBtn.style.display = 'inline-flex';
+            nextBtn.textContent = btnText;
+
+            nextBtnOutput.style.display = 'inline-flex';
+            nextBtnOutput.textContent = btnText;
+        } else {
+            nextBtn.style.display = 'none';
+            nextBtnOutput.style.display = 'none';
+            showStatus(`🥦 Complete ${maxParts}-Part Series Generated!`, 'success');
+        }
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loading').classList.remove('visible');
+        showStatus(`Error: ${error.message} `, 'error');
+    }
+}
+
+function nextVegPart() {
+    const sceneSelect = document.getElementById('vegSceneNum');
+    const totalParts = parseInt(document.getElementById('vegDuration').value);
+    let current = parseInt(sceneSelect.value);
+
+    if (current < totalParts) {
+        current++;
+        // If the sceneSelect dropdown doesn't have enough options (since it might be hardcoded 1-3), 
+        // we just conceptually rely on the value being set, even if it's not in the visible list (it's hidden anyway).
+        // But for safety, we should add options dynamically if needed, Or since it's hidden, we can just assume `value` holds state.
+        // However, standard HTML select might not accept values not in option list.
+        // Since we hid the dropdown, let's just make sure we are not restricted by its options.
+        // Better yet, just create the option if missing to avoid errors.
+        if (!sceneSelect.querySelector(`option[value="${current}"]`)) {
+            const opt = document.createElement("option");
+            opt.value = current;
+            opt.text = `Part ${current}`;
+            sceneSelect.add(opt);
+        }
+
+        sceneSelect.value = current.toString();
+        generateVegetablePrompt();
+    }
+}

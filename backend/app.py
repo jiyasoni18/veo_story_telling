@@ -51,7 +51,7 @@ def get_stories():
 
 @app.route("/api/memory", methods=["GET"])
 def get_memory():
-    """Retrieve the LATEST scene state from the most recently updated story"""
+    """Retrieve the LATEST scene state AND full story context from the most recently updated story"""
     if db is None:
         return jsonify({"error": "Database not connected"}), 500
         
@@ -63,6 +63,15 @@ def get_memory():
             # Get the very last scene added to this story
             last_scene = latest_story['scenes'][-1]
             
+            # Build Context from ALL scenes
+            story_context = []
+            for s in latest_story['scenes']:
+                # Format: "Scene 1: [Description]"
+                summary = f"Scene {s.get('scene_number', '?')}: {s.get('description', '')}"
+                story_context.append(summary)
+            
+            full_history = "\n".join(story_context)
+
             # Construct the state object expected by frontend
             state = {
                 "enabled": True, # Default to true if loaded
@@ -73,7 +82,8 @@ def get_memory():
                 "setting": last_scene.get('setting', ''),
                 "lighting": last_scene.get('lighting', ''),
                 "timeOfDay": last_scene.get('time_of_day', ''),
-                "characters": last_scene.get('characters', {})
+                "characters": last_scene.get('characters', {}),
+                "storyContext": full_history  # NEW FIELD
             }
             return jsonify(state)
         else:
@@ -84,7 +94,8 @@ def get_memory():
                 "characters": {},
                 "setting": "",
                 "lighting": "",
-                "timeOfDay": ""
+                "timeOfDay": "",
+                "storyContext": "" # NEW FIELD
             })
             
     except Exception as e:
@@ -93,7 +104,7 @@ def get_memory():
 
 @app.route("/api/memory", methods=["POST"])
 def save_memory():
-    """Save a SCENE to a STORY (Create story if new, append scene if exists)"""
+    """Save a SCENE to a STORY (Create story if new, append scene if exists) and return updated context"""
     if db is None:
         return jsonify({"error": "Database not connected"}), 500
 
@@ -119,6 +130,8 @@ def save_memory():
         # Check if story exists (Case insensitive check could be better, but simple match for now)
         existing_story = user_data_collection.find_one({"title": story_title})
         
+        updated_scenes = []
+
         if existing_story:
             # APPEND to existing story
             user_data_collection.update_one(
@@ -128,6 +141,9 @@ def save_memory():
                     "$set": {"last_updated": datetime.utcnow()}
                 }
             )
+            # Fetch updated list for context
+            updated_story = user_data_collection.find_one({"_id": existing_story["_id"]})
+            updated_scenes = updated_story.get('scenes', [])
             message = f"Scene added to existing story: '{story_title}'"
         else:
             # CREATE new story document
@@ -138,9 +154,22 @@ def save_memory():
                 "scenes": [current_scene]
             }
             user_data_collection.insert_one(new_story)
+            updated_scenes = [current_scene]
             message = f"New story created: '{story_title}' with first scene"
 
-        return jsonify({"status": "success", "message": message})
+        # Build Updated Context
+        story_context = []
+        for s in updated_scenes:
+            summary = f"Scene {s.get('scene_number', '?')}: {s.get('description', '')}"
+            story_context.append(summary)
+        
+        full_history = "\n".join(story_context)
+
+        return jsonify({
+            "status": "success", 
+            "message": message,
+            "storyContext": full_history # Return the fresh history
+        })
         
     except Exception as e:
         print(f"Error in POST /api/memory: {e}")
@@ -159,64 +188,96 @@ def reset_memory():
 
 @app.route("/generate", methods=["POST"])
 def generate():
-    """Generate Veo prompt using Hugging Face LLM"""
+    """Generate Veo prompt using either Hugging Face LLM or Google Gemini"""
     try:
         data = request.json
 
         token = data.get("token")
         model = data.get("model")
         prompt = data.get("prompt")
+        provider = data.get("provider", "huggingface") # Default to HF
 
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
-        }
-
-        payload = {
-            "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "max_tokens": 2000,
-            "temperature": 0.7,
-            "top_p": 0.95,
-            "stream": False
-        }
-
-        print(f"\n=== REQUEST TO HUGGING FACE ===")
-        print(f"Model: {model}")
-        print(f"Prompt length: {len(prompt)} chars")
+        print(f"\n=== GENERATION REQUEST ===")
+        print(f"Provider: {provider}")
         
-        response = requests.post(
-            "https://router.huggingface.co/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=120
-        )
+        # --- GOOGLE GEMINI GENERATION ---
+        if provider == 'gemini':
+            print(f"Model: gemini-2.5-flash (Google)")
+            if not token:
+                return jsonify({"error": "Gemini API Key is missing"}), 400
 
-        print(f"\n=== RESPONSE FROM HUGGING FACE ===")
-        print(f"Status Code: {response.status_code}")
-        
-        if response.status_code != 200:
-            try:
-                error_data = response.json()
-                error_msg = error_data.get('error', str(error_data))
-            except:
-                error_msg = response.text or f"HTTP {response.status_code} error"
+            # Use v1 stable endpoint
+            api_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={token}"
             
-            print(f"Error: {error_msg}")
-            return jsonify({"error": error_msg}), response.status_code
+            payload = {
+                "contents": [{
+                    "parts": [{"text": prompt}]
+                }],
+                "generationConfig": {
+                    "temperature": 0.7,
+                }
+            }
 
-        result = response.json()
-        
-        if isinstance(result, dict) and 'choices' in result:
-            generated_text = result['choices'][0]['message']['content']
-            return jsonify([{"generated_text": generated_text}])
+            headers = {"Content-Type": "application/json"}
+            
+            print(f"Calling Gemini API: {api_url.split('?')[0]}...") # Log URL without key
+            response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'candidates' in result and result['candidates']:
+                    generated_text = result['candidates'][0]['content']['parts'][0]['text']
+                    return jsonify([{"generated_text": generated_text}])
+                else:
+                    return jsonify({"error": "No candidates returned from Gemini"}), 500
+            else:
+                print(f"Gemini Error Body: {response.text}")
+                return jsonify({"error": f"Gemini API Error ({response.status_code}): {response.text}"}), response.status_code
+
+        # --- HUGGING FACE GENERATION (Default) ---
         else:
-            return jsonify(result)
+            print(f"Model: {model}")
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+
+            payload = {
+                "model": model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                "max_tokens": 2000,
+                "temperature": 0.7,
+                "top_p": 0.95,
+                "stream": False
+            }
+            
+            response = requests.post(
+                "https://router.huggingface.co/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=120
+            )
+
+            if response.status_code != 200:
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get('error', str(error_data))
+                except:
+                    error_msg = response.text or f"HTTP {response.status_code} error"
+                return jsonify({"error": error_msg}), response.status_code
+
+            result = response.json()
+            
+            if isinstance(result, dict) and 'choices' in result:
+                generated_text = result['choices'][0]['message']['content']
+                return jsonify([{"generated_text": generated_text}])
+            else:
+                return jsonify(result)
         
     except Exception as e:
         print(f"\n=== ERROR ===")
@@ -428,14 +489,14 @@ START YOUR ANALYSIS NOW:
 
 if __name__ == "__main__":
     print("\n" + "="*60)
-    print("🚀 VEO ULTIMATE GENERATOR - MONGODB EDITION")
+    print("VEO ULTIMATE GENERATOR - MONGODB EDITION")
     print("="*60)
-    print("\n📋 Available Endpoints:")
-    print("  - POST /generate       → Generate Veo prompts")
-    print("  - POST /analyze_image  → Analyze images")
-    print("  - GET  /api/memory     → Load state from MongoDB")
-    print("  - POST /api/memory     → Save state to MongoDB")
-    print("\n🌐 Server running on: http://localhost:5001")
+    print("\nAvailable Endpoints:")
+    print("  - POST /generate       -> Generate Veo prompts")
+    print("  - POST /analyze_image  -> Analyze images")
+    print("  - GET  /api/memory     -> Load state from MongoDB")
+    print("  - POST /api/memory     -> Save state to MongoDB")
+    print("\nServer running on: http://localhost:5001")
     print("="*60 + "\n")
     
     app.run(port=5001, debug=True)
