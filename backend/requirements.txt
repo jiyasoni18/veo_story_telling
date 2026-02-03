@@ -4,3 +4,9 @@ requests
 pymongo
 python-dotenv
 certifi
+flask
+flask-cors
+requests
+pymongo
+python-dotenv
+certifi
