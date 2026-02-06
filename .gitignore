@@ -31,3 +31,16 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+
+# Node.js / React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.npm
+.eslintcache
+
+# React Build
+frontend-react/dist/
+frontend-react/build/
